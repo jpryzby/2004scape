@@ -1,0 +1,37 @@
+[debugproc,chop_magic]
+
+def_int $lap_count = 0;
+
+while(p_finduid(uid) = true){
+    mes("you have run <tostring($lap_count)> inventories of logs");
+    //Turn on Run
+    ~botrun(50,999,true);
+
+    //Walk to the tree
+    ~botwalk(0_42_53_9_33);
+
+    while(inv_freespace(inv) > 0){
+
+        if(loc_find(0_42_53_8_31, magic_tree) = true & p_finduid(uid) = true){
+            ~chop_tree(0_42_53_8_31, magic_tree, 0_42_53_9_33);
+        }else{ if(loc_find(0_42_53_3_32, magic_tree) = true & p_finduid(uid) = true){
+            ~chop_tree(0_42_53_3_32, magic_tree, 0_42_53_5_33);
+            }else{if(loc_find(0_42_53_2_35, magic_tree) = true & p_finduid(uid) = true){
+                ~chop_tree(0_42_53_2_35, magic_tree, 0_42_53_3_34);
+                }else{
+                    //wait
+                }
+            }
+        }
+    }
+    ~botwalk(0_42_54_39_37);
+    ~bot_bank_deposit(0_42_54_39_38, 27);
+
+    $lap_count = calc($lap_count + 1);
+}
+
+
+
+
+
+

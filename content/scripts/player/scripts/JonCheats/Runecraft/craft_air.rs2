@@ -1,0 +1,70 @@
+[debugproc,craft_air]
+mes("craft air rune");
+
+
+
+
+while(inv_getobj(inv, 27) ! air_talisman){
+    ~walk_to_air_alter;
+    ~craft_air_rune;
+    ~bank_air_rune;
+}
+
+
+
+
+
+
+
+
+[proc,walk_to_air_alter]
+//Turn on Run
+~botrun(75,999,true);
+
+//Walk to the city wall, then to the air temple
+~botwalk(0_46_51_62_59);
+~botwalk(0_46_51_41_30);
+
+
+
+
+[proc,craft_air_rune]
+//enter the temple
+facesquare(0_46_51_40_27);
+if(p_finduid(uid) = true){
+    anim(human_pickupfloor, 0);
+    sound_synth(teleport_all, 0, 0);
+    mes("You hold the Air talisman towards the mysterious ruins.");
+    mes("You feel a powerful force take hold of you...");
+    if(p_finduid(uid) = true){
+        p_delay(1);
+        p_telejump(0_44_75_25_30);
+    }
+}
+
+//walk to the alter
+~botwalk(0_44_75_27_32);
+
+//craft the runes
+~bot_oploc(0_44_75_27_33,rc_air_altar,1);
+
+
+
+
+[proc,bank_air_rune]
+mes("walk to exit portal");
+//walk to exit portal
+~botwalk(0_44_75_25_29);
+
+//tele out
+~bot_oploc(0_44_75_25_28,rc_air_altar_exit_portal,1);
+
+//walk back to city wall, then bank
+~botwalk(0_46_51_62_59);
+~botwalk(0_47_52_4_27);
+
+//deposit air runes, withdraw rune essence
+~bot_bank_deposit(0_47_52_4_26, 1);
+~bot_bank_withdraw(0_47_52_4_26, blankrune, 27);
+
+

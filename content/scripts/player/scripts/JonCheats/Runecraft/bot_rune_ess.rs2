@@ -1,0 +1,150 @@
+[debugproc,ess]
+mes("running ess bot");
+
+  
+while(p_finduid(uid) = true){
+    ~botrun(80,999,true);
+    ~botwalk(0_50_53_53_7);
+    ~teleport_to_essence_mine(^essence_mine_to_aubury);
+    ~mine_ess_rock;
+    //~bank_ess
+}
+
+
+
+
+
+
+
+
+
+[proc,teleport_to_essence_mine](coord $tele_back_coord)
+if(npc_find(0_50_53_53_7, aubury, 6, 0) = true & p_finduid(uid) = true) { 
+    p_finduid(uid);
+    p_opnpc(1);
+    //def_int $choice = ~p_choice2($string1, 1, $string2, 2);
+    //if ($choice = 1) jump($label1);
+    //jump($label2);
+    
+    world_delay(10);
+
+    if_close;
+    %exit_essence_mine_coord = $tele_back_coord;
+    // this is lowercase
+    npc_say("Senventior disthine molenko!");
+    if ($tele_back_coord ! ^essence_mine_to_brimstail) { // brimstall anim buggy, need gnome equivalent (or no anim like OSRS)
+        npc_anim(human_castcurse, 0); // No anim in osrs
+    }
+    spotanim_npc(curse_casting, 92, 0);
+    sound_synth(curse_all, 0, 0);
+    def_int $duration = ~player_projectile(npc_coord, coord, uid, curse_travel, 31, 31, 61, 16, 0, 128, 5);
+    // osrs is 100 but 70 lines up better with our different sound synth
+    spotanim_pl(curse_impact, 124, 70);
+    // IncompleteProjectile(id = 109, startHeight = 31, endHeigsht = 31, delay = 61, angle = 16, distOffset = 128)	
+    p_delay(4);
+    // select random coord
+    def_coord $coord = enum(int, coord, essence_mine_teleports, random(enum_getoutputcount(essence_mine_teleports)));
+    // select random coord at a radius of 1
+    $coord = map_findsquare($coord, 0, 1, ^map_findsquare_lineofsight);
+    p_telejump($coord);
+}
+
+
+
+
+
+[proc,mine_ess_rock]
+
+//walk to ess rocks
+//JPTODO: implement logic to go to whichever rock is closest
+
+def_coord $walk_coord = 0_45_75_49_53;
+def_coord $rock_coord = 0_45_75_45_48;
+def_coord $portal_coord = 0_45_75_51_54;
+def_coord $portal_walk_coord = 0_45_75_51_54;
+
+//JPTODO make this a switchcase
+if(coordz(coord) > 4830){
+    if(coordx(coord) > 2910){
+        //ne
+        $walk_coord = 0_45_75_49_53;
+        $rock_coord = 0_45_75_45_48;
+        $portal_coord = 0_45_75_52_54;
+        $portal_walk_coord = 0_45_75_51_54;
+    }else{  
+        //nw
+        $walk_coord = 0_45_75_10_47;
+        $rock_coord = 0_45_75_11_47;
+        $portal_coord = 0_45_75_5_50;
+        $portal_walk_coord = 0_45_75_6_50;
+    }
+}else{
+    if(coordx(coord) > 2910){
+        //se
+        $walk_coord = 0_45_75_52_15;
+        $rock_coord = 0_45_75_47_14;
+        $portal_coord = 0_45_75_53_15;
+        $portal_walk_coord = 0_45_75_52_15;
+    }else{
+        //sw
+        $walk_coord = 0_45_75_12_13;
+        $rock_coord = 0_45_75_13_12;
+        $portal_coord = 0_45_75_9_13;
+        $portal_walk_coord = 0_45_75_10_13;
+    }
+}
+
+
+~botwalk($walk_coord);
+
+//attempt to mine
+world_delay(1);
+if(loc_find($rock_coord, loc_2491) = true & p_finduid(uid) = true) {
+    facesquare(0_45_75_51_15);
+    p_oploc(1);
+    mes("mining rune ess");
+}else {
+    mes("failed, could not find loc_2491");
+}
+//attempt to mine
+world_delay(1);
+if(loc_find($rock_coord, loc_2491) = true & p_finduid(uid) = true) {
+    facesquare(0_45_75_51_15);
+    p_oploc(1);
+    mes("mining rune ess");
+}else {
+    mes("failed, could not find loc_2491");
+}
+
+
+//Wait until inventory is full
+while(inv_freespace(inv) > 0 ) {
+    if_close;
+    world_delay(1);
+}
+world_delay(1);
+if_close;
+world_delay(1);
+
+
+
+
+//[proc,bank_ess](coord $portal_coord, coord $portal_walk_coord)
+mes("attempting to tele out");
+
+if(loc_find($portal_coord, loc_2492) = true & p_finduid(uid) = true) {
+    ~botwalk($portal_walk_coord);
+
+    facesquare($portal_coord);
+    p_oploc(1);
+    mes("teleporting out");
+    world_delay(5);
+}else {
+    mes("failed, could not find loc_2492");
+}
+
+
+~botwalk(0_50_53_54_28);
+~bot_bank_deposit(0_50_53_54_27, 27);
+
+

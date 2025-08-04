@@ -1,0 +1,25 @@
+[proc,craft_hardlearther_bodies]
+mes("Craft Hard Leather Bodies");
+
+while(inv_total(inv,hard_leather) > 0){
+    ~craft_leather(hardleather_body);
+}
+
+
+
+[proc,craft_coifs]
+mes("Craft Coifs");
+
+while(inv_total(inv,leather) > 0){
+    ~craft_leather(coif);
+}
+
+
+
+[debugproc,craft_coifs1]
+while(p_finduid(uid) = true){
+    ~craft_coifs;
+    ~bot_bank_deposit_all(0_51_49_4_30,2);
+    ~bot_bank_withdraw(0_51_49_4_30,leather,26);
+
+}

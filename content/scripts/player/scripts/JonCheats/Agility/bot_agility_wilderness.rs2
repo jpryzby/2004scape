@@ -1,0 +1,154 @@
+[debugproc,agi]
+mes("Running Wilderness agility Course");
+
+def_obj $food = trout;
+
+def_int $lapCounter = 0;
+while(p_finduid(uid) = true){
+
+    mes("Health = <tostring(stat(hitpoints))>");
+    if(stat(hitpoints) < 20){
+        mes("health low");
+
+        if(inv_total(inv,$food) > 0){
+            while(stat(hitpoints) < 20){
+                ~eat_trout($food);
+            }
+        }else{
+            ~agi_get_more_food($food);
+        }
+    }
+
+    mes("<tostring($lapCounter)> laps completed");
+    ~botrun(90,999,true);
+
+    // obstacle pipe //
+    ~agi_obst(0_46_61_60_33, 0_46_61_60_34, wilderness_obstacle_pipe, 9);
+
+    // rope swing //
+    ~agi_obst_failable(0_46_61_61_54, 0_46_61_61_49, 0_46_61_61_48, wilderness_rope_swing, 3, 0_46_161_60_53,true);
+
+    // Stepping Stone //
+    ~agi_obst_failable(0_46_61_52_56, 0_46_61_58_56, 0_46_61_57_56, wilderness_stepping_stone, 10, 0_46_61_58_59,false);
+    
+    // Balance log //
+    ~agi_obst_failable(0_46_61_50_41, 0_46_61_57_42, 0_46_61_57_41, wilderness_log_balance, 7, 0_46_161_54_41,true);
+
+    // Climbing Rocks //
+    ~agi_obst(0_46_61_50_33, 0_46_61_49_32, wilderness_rocks, 5);
+
+
+
+    $lapCounter = add($lapCounter,1);
+}
+
+
+
+
+[proc,agi_get_more_food](obj $food)
+~botwalk(0_46_61_54_27);
+~bot_oploc(0_46_61_54_27,loc_2307,1);
+world_delay(18);
+~botwalk(0_47_61_39_40);
+~botwalk(0_48_61_24_53);
+
+while(loc_find(0_48_61_23_53,loc_733) = true){
+    ~bot_oploc(0_48_61_23_53,loc_733,1);
+}
+world_delay(2);
+while(loc_find(0_48_61_21_53,loc_733) = true){
+    ~bot_oploc(0_48_61_21_53,loc_733,1);
+}
+world_delay(2);
+
+~botwalk(0_48_61_20_53);
+~bot_oploc(0_48_61_19_53,loc_2871,1);
+~botwalk(0_39_73_40_43);
+
+
+
+
+///banking
+//[proc,magearena_banker]
+if(p_finduid(uid) = true & npc_find(0_39_73_40_43, magearena_banker, 8, 0) = true){
+    ~botwalk(npc_coord);
+    ~bot_chatplayer("<p,quiz>Hello, what are you doing out here?");
+    ~bot_chatnpc("<p,happy>I'm a banker, the only one around these dangerous parts.");
+
+    if_close;
+
+    ~bank_withdraw_request(inv, $food, 28, 0);
+    world_delay(1);
+    if_close;
+
+
+
+
+
+    ~botwalk(0_39_73_39_40);
+    ~bot_oploc(0_39_73_45_41,loc_2872,1);
+    while(loc_find(0_48_61_21_53,loc_733) = true){
+        ~bot_oploc(0_48_61_21_53,loc_733,1);
+    }
+    while(loc_find(0_48_61_23_53,loc_733) = true){
+        ~bot_oploc(0_48_61_23_53,loc_733,1);
+    }
+
+    ~botwalk(0_47_61_39_40);
+    ~botwalk(0_46_61_54_12);
+    ~bot_oploc(0_46_61_54_13,loc_2309,1);   ///Add in Fall condition
+}
+
+
+
+[proc,eat_trout](obj $food)
+~player_consume_item(2, 3, $food);
+
+
+
+
+
+
+
+
+
+[proc,player_consume_item](int $eat_delay, int $skill_delay, obj $food)
+if(p_finduid(uid) = true){
+    def_obj $obj = $food;
+
+    if (~duel_arena_consume_check($obj) = false) {
+        return;
+    }
+
+    if ($eat_delay ! null) {
+        if (%eat_delay >= map_clock) {
+            return;
+        }
+        %eat_delay = calc(map_clock + $eat_delay);
+    }
+
+    if ($skill_delay ! null) {
+        %action_delay = calc(%action_delay + $skill_delay);
+    }
+
+    // consume effect
+    ~consume_effect_stat($food);
+}
+
+
+
+
+
+[proc,consume_effect_stat](obj $food)
+if(p_finduid(uid) = true){
+
+    // change item to its next stage. default is null
+    inv_del(inv, $food, 1);
+    //if (oc_param($food, next_obj_stage) ! null) {
+    //    inv_setslot(inv, last_slot, oc_param($food, next_obj_stage), 1);
+    //}
+    anim(human_eat, 0);
+    ~consume_effect_apply($food, false);
+}
+
+

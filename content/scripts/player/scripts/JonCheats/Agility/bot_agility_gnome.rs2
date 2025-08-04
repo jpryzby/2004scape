@@ -1,0 +1,33 @@
+[debugproc,agi1]
+mes("Running Gnome agility Course");
+
+
+def_int $lapCounter = 0;
+while(p_finduid(uid) = true){    
+
+    mes("<tostring($lapCounter)> laps completed");
+    ~botrun(90,999,true);
+
+    // Log Balance //
+    ~agi_obst(0_38_53_42_44, 0_38_53_42_43, gnome_log_balance, 6);
+
+    // Obstacle Net 1 //
+    ~agi_obst(0_38_53_42_34, 0_38_53_41_33, gnome_obstacle_net_1, 1);
+
+    // Tree Branch 1 //
+    ~agi_obst(1_38_53_41_31, 1_38_53_41_30, gnome_tree_branch_1, 0);
+
+    // Balance Rope //
+    ~agi_obst(2_38_53_45_28, 2_38_53_46_28, gnome_balancing_rope, 1);
+
+    // Tree Branch 2 //
+    ~agi_obst(2_38_53_54_28, 2_38_53_54_27, gnome_tree_branch_2, 1);
+
+    // Obstacle Net 2 //
+    ~agi_obst(0_38_53_55_33, 0_38_53_55_34, gnome_obstacle_net_2, 0);
+
+    // Obstacle Pipe //
+    ~agi_obst(0_38_53_55_38, 0_38_53_55_39, gnome_obstacle_pipe, 11);
+
+    $lapCounter = add($lapCounter,1);
+}

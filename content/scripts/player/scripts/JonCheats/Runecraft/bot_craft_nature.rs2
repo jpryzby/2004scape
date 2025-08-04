@@ -1,0 +1,140 @@
+[debugproc,craft_nature]
+mes("Crafting Natures");
+
+while(inv_total(inv, cert_blankrune) > 24){
+    //go to general store
+    ~botrun(0,999,true);
+    if(npc_find(0_43_48_15_50, jiminua, 6, 0) = true & p_finduid(uid) = true) {
+        //~botwalk(npc_coord);
+        p_opnpc(3);
+        mes("found");
+
+        
+        //sell 24 essence certs
+        ~sell_item(cert_blankrune, 24);
+
+        //buy all essence
+        ~buy_item_nature(blankrune, 24);
+        world_delay(10);
+        if_close;
+    }else{
+        mes("not found");
+    }
+
+
+    ~botwalk(0_43_48_40_15);
+    ~botwalk(0_44_47_9_56);
+    ~botwalk(0_44_47_37_30);
+    ~botwalk(0_44_47_52_13);
+
+    //enter ruin
+    facesquare(0_44_47_52_10);
+    if(p_finduid(uid) = true){
+        anim(human_pickupfloor, 0);
+        sound_synth(teleport_all, 0, 0);
+        mes("You hold the Nature talisman towards the mysterious ruins.");
+        mes("You feel a powerful force take hold of you...");
+        p_delay(1);
+        p_telejump(0_37_75_32_35);
+    }
+
+    //walk to alter
+    ~botwalk(0_37_75_32_39);
+
+    //craft runes
+    ~bot_oploc(0_37_75_31_40, rc_nature_altar,1);
+    world_delay(3);
+
+    //exit ruin
+    ~botwalk(0_37_75_32_35);
+    ~bot_oploc(0_37_75_32_34,rc_nature_altar_exit_portal,1);
+
+    //walk back to general store
+    ~botwalk(0_44_47_37_30);
+    ~botwalk(0_44_47_9_56);
+    ~botwalk(0_43_48_40_15);
+    ~botwalk(0_43_48_21_46);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+[proc,buy_item_nature](obj $obj, int $amount)
+def_int $i = 0;
+def_int $current_gp = inv_total(inv, coins);
+def_int $shop_stock = calc(inv_total(%shop, $obj));
+def_int $space_overflow = inv_itemspace2(inv, $obj, $amount, inv_size(inv));
+def_int $total_cost = 0;
+// Since pricing and stock will change constantly we will have to iterate here to calc
+while($i < $amount) {
+    def_int $added_amt = ~adjusted_item_cost_buying($obj, calc($shop_stock - $i));
+    def_int $current_stock = calc($shop_stock - $i);
+    if(calc($total_cost + $added_amt) > $current_gp) {
+        if ($i > 0) {
+            wealth_event(^wealth_shop_buy, oc_debugname($obj), $i, $total_cost);
+        }
+        mes("You don't have enough coins.");
+        return;
+    }
+    if($current_stock <= 0) {
+        if ($i > 0) {
+            wealth_event(^wealth_shop_buy, oc_debugname($obj), $i, $total_cost);
+        }
+        mes("The shop has run out of stock.");
+        return;
+    }
+    // do calc($total_cost + $added_amt) ! $current_gp for the case where the exact gp required for the purchase
+    // is used. Not sure if this should be the case in 2004
+    if($space_overflow >= calc($amount - $i) & calc($total_cost + $added_amt) ! $current_gp) {
+        if ($i > 0) {
+            wealth_event(^wealth_shop_buy, oc_debugname($obj), $i, $total_cost);
+        }
+        mes("You don't have enough inventory space.");
+        return;
+    }
+    $total_cost = calc($total_cost + $added_amt);
+    inv_del(inv, coins, $added_amt);
+    inv_moveitem_uncert(%shop, inv, $obj, 1);
+    $i = calc($i + 1);
+}
+wealth_event(^wealth_shop_buy, oc_debugname($obj), $i, $total_cost);
+
+// Sell an item to the shop
+[proc,sell_item](obj $obj, int $amount)
+def_int $shop_total = inv_total(%shop, oc_uncert($obj));
+def_int $total_value = 0;
+def_int $sell_amount = ~calculate_items_amount_sold($obj, $amount);
+if(~can_sell_obj($obj) = false) {
+    return;
+}
+// Check if you will have space in your inventory to hold the coins after selling
+if(inv_itemspace(inv, coins, $sell_amount, inv_size(inv)) = false & oc_stackable($obj) = true & inv_total(inv, $obj) > $sell_amount) {
+    mes("You don't have enough inventory space.");
+    return;
+}
+// Check if the shop will have enough space to hold the obj
+if(inv_itemspace(%shop, oc_uncert($obj), $sell_amount, inv_size(%shop)) = false) {
+    mes("The shop has run out of space.");
+    return;
+}
+// Iteration to calc the total value of the sale
+def_int $i = 0;
+while($i < $sell_amount) {
+    def_int $added_amt = ~adjusted_item_cost_selling(oc_uncert($obj), calc($shop_total + $i));
+    $total_value = calc($total_value + $added_amt);
+    $i = calc($i + 1);
+}
+// now perform the transaction 
+inv_moveitem_uncert(inv, %shop, $obj, $sell_amount);
+wealth_event(^wealth_shop_sell, oc_debugname($obj), $sell_amount, $total_value);
+if($total_value > 0) {
+    inv_add(inv, coins, $total_value);
+}

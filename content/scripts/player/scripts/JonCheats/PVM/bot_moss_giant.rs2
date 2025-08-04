@@ -1,0 +1,95 @@
+[debugproc,mossgiant]
+mes("Hunting Moss Giants");
+
+
+while(p_finduid(uid) = true){
+    mes("Fighting");
+    def_coord $loot_coord = ~fight_moss_giant;
+
+    mes("Looting");
+    ~loot_moss_giant($loot_coord);
+
+    mes("Reseting");
+}
+
+
+
+////////// Fight Moss Giants //////////
+[proc,fight_moss_giant]()(coord)
+
+~botrun(50,999,true);
+//go to safety spot//////////////////broken
+~botwalk(0_39_53_57_13);
+
+
+//find an enemy near 0_39_53_61_10
+if(npc_find(0_39_53_61_10, mossgiant, 6, 0) = true){
+    //mes("found mossgiant");
+
+    def_coord $giantCoord = npc_coord;
+    if(p_finduid(uid) = true){
+        p_opnpc(2);
+    }
+    world_delay(10);
+    
+    // While in combat
+    while(add(%npc_lastcombat, 8) > map_clock){
+
+        if(p_finduid(uid) = true & coord ! 0_39_53_57_13){
+            p_walk(0_39_53_57_13);
+            while(coord ! 0_39_53_57_13){
+                world_delay(1);
+                mes("walking back to safety spot");
+                p_telejump(0_39_53_57_13);
+                //p_walk(0_39_53_57_13); /////////////////////////////currently not working
+            }
+            p_opnpc(2);
+        }
+
+        $giantCoord = npc_coord;
+        //mes("in combat");
+        if_close;
+        world_delay(1);
+    }
+    //mes("left combat");
+    //~loot_moss_giant($giantCoord);
+
+    return ($giantCoord);
+}
+
+
+
+
+
+////////// Loot //////////
+[proc,loot_moss_giant](coord $giantCoord)
+
+obj_findallzone($giantCoord);
+while(obj_findnext() = true & inv_freespace(inv) > 0){
+    ~botwalk($giantCoord);
+    switch_obj(active_obj) {
+        case big_bones : ~bury;
+
+        case uncut_sapphire : ~destroy;
+        case uncut_emerald : ~destroy;
+        case steel_kiteshield : ~destroy;
+        case steel_bar : ~destroy;
+        case black_sq_shield : ~destroy;
+        case steel_med_helm : ~destroy;
+        case mithril_sword : ~destroy;
+        case mithril_spear : ~destroy;
+        case spinach_roll : ~destroy;
+        case coal : ~destroy;
+        case magicstaff : ~destroy;
+        case unidentified_guam : ~destroy;
+        case unidentified_marrentill : ~destroy;
+        case unidentified_harralander : ~destroy;
+
+        case bronze_arrow : ~pick_up(0);
+        case bronze_knife : ~pick_up(0);
+        case iron_knife : ~pick_up(0);
+
+        case default : ~pick_up(1);
+    }
+    obj_findallzone($giantCoord); 
+}

@@ -1,0 +1,30 @@
+[debugproc,shaft]
+//mes("fletching arrow shafts");
+
+
+def_int $loop = 0;
+while($loop <26){
+    if(p_finduid(uid) = true){
+        
+        def_obj $log = inv_getobj(inv,27);
+        db_find(fletch_bow_table:log, $log);
+
+        def_dbrow $data = db_findnext;
+        if ($data = null) {
+            ~displaymessage(^dm_default);
+            return;
+        }
+
+        def_int $shaft_count = db_getfield($data, fletch_bow_table:shafts, 0);
+        def_string $message = "You carefully cut the wood into <tostring($shaft_count)> arrow shafts.";
+        def_namedobj $product = arrow_shaft;
+        def_int $fletching_experience = multiply($shaft_count, 5);
+
+        inv_del(inv, $log, 1);
+        mes($message);
+        stat_advance(fletching, $fletching_experience);
+        inv_add(inv, $product, $shaft_count);
+    }
+
+    $loop = add($loop,1);
+}

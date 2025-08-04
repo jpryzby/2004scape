@@ -1,0 +1,110 @@
+[debugproc,bowstring]
+mes("Making Bowstrings");
+
+while(p_finduid(uid) = true){
+    ~pick_five_main_flax;
+    ~pick_last_three_flax;
+    ~bot_spin_flax;
+    ~bank_flax;
+}
+
+
+
+
+
+[proc,pick_five_main_flax]
+~botwalk(0_38_53_37_15);
+~botrun(999,0,true);
+
+def_int $c = 0;
+while($c < 5){
+    ~botwalk(0_38_53_37_15);
+    ~bot_oploc(0_38_53_36_15, flax_ground, 2);
+
+    ~botwalk(0_38_53_37_14);
+    ~bot_oploc(0_38_53_37_13, flax_ground, 2);
+
+    ~botwalk(0_38_53_38_11);
+    ~bot_oploc(0_38_53_37_11, flax_ground, 2);
+
+    ~botwalk(0_38_53_38_11);
+    ~bot_oploc(0_38_53_39_11, flax_ground, 2);
+
+    ~botwalk(0_38_53_43_12);
+    ~bot_oploc(0_38_53_43_11, flax_ground, 2);
+
+    world_delay(1);
+    $c = calc($c + 1);
+}
+
+
+
+[proc,pick_last_three_flax]
+~botrun(30,999,true);///////////////not working
+~botwalk(0_38_53_37_15);
+~bot_oploc(0_38_53_36_15, flax_ground, 2);
+
+~botwalk(0_38_53_37_14);
+~bot_oploc(0_38_53_37_13, flax_ground, 2);
+
+~botwalk(0_38_53_43_12);
+~bot_oploc(0_38_53_43_11, flax_ground, 2);
+
+
+
+[proc,bot_spin_flax]
+
+//walk to spinning wheel
+~botwalk(0_38_53_43_10);
+~bot_oploc(0_38_53_43_8, loc_1742, 1);
+
+world_delay(1);
+~botwalk(1_38_53_44_6);
+
+//spin flax
+def_int $count = 0;
+while($count < 28){
+    def_struct $struct = oc_param(flax, crafting_spinning_struct);
+    // check if we have the required level
+    def_int $level = struct_param($struct, levelrequire);
+    if (stat(crafting) < $level & p_finduid(uid) = true) {
+        ~mesbox("You need level <tostring($level)> Crafting to make that.");
+        return;
+    }
+    // macro event
+    if (afk_event = ^true) {
+        ~macro_event_general_spawn(~macro_event_set_random);
+        return;
+    }
+    // play human animation
+    if(p_finduid(uid) = true & loc_find(1_38_53_43_6, spinning_wheel) = true){
+        anim(human_spinningwheel, 0);
+        loc_anim(spinningwheel);
+        // if sound is found, play here
+        inv_del(inv, struct_param($struct, ingredient), 1);
+        inv_add(inv, struct_param($struct, product), 1);
+        mes(struct_param($struct, processmessage));
+        stat_advance(crafting, struct_param($struct, productexp));
+        p_delay(3);
+    }
+    $count = calc($count + 1);
+}
+world_delay(3);
+if_close;
+
+
+
+[proc,bank_flax]
+//walk to bank
+~botwalk(1_38_53_43_7);
+~bot_oploc(1_38_53_43_8, loc_1744, 1);
+
+~botwalk(0_38_53_13_21);
+~bot_oploc(0_38_53_12_22, loc_1742, 1);
+
+~botwalk(1_38_53_13_32);
+~bot_bank_deposit(1_38_53_12_32, 27);
+
+//walk back to start
+~botwalk(1_38_53_13_24);
+~bot_oploc(1_38_53_13_23, loc_1744, 1);

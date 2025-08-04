@@ -1,0 +1,48 @@
+
+[proc,craft_leather](namedobj $product)
+if(p_finduid(uid) = true){
+    if_close;
+    db_find(craft_leather_table:product, $product);
+    def_dbrow $product_data = db_findnext;
+    if ($product_data = null) {
+        ~displaymessage(^dm_default);
+        return;
+    }
+    if (db_getfield($product_data, craft_leather_table:members, 0) = true) {
+        if (map_members = ^false) {
+            mes(^mes_members_feature);
+            return;
+        }
+    }
+    // check level
+    def_int $level = db_getfield($product_data, craft_leather_table:levelrequired, 0);
+    if (stat(crafting) < $level) {
+        ~mesbox("You need a Crafting level of <tostring($level)> to make <db_getfield($product_data, craft_leather_table:name, 0)>.");
+        return;
+    }
+    def_namedobj $leather;
+    def_int $leather_count;
+    $leather, $leather_count = db_getfield($product_data, craft_leather_table:leather, 0);
+    if (inv_total(inv, $leather) < $leather_count) {
+        mes("You don't have enough leather to make <db_getfield($product_data, craft_leather_table:name, 0)>.");
+        return;
+    }
+    if (inv_total(inv, thread) < 1) {
+        ~objbox(thread, "You need some thread to make anything out of leather.", 250, 0, divide(^objbox_height, 2));
+        return;
+    }
+    // delete thread after 5 uses are met
+    %thread_used = calc(%thread_used + 1);
+    if (%thread_used > 4) {
+        inv_del(inv, thread, 1);
+        mes("You use up one of your reels of Thread.");
+        %thread_used = 0;
+    }
+    inv_del(inv, $leather, $leather_count);
+
+    inv_add(inv, $product, 1);
+    stat_advance(crafting, db_getfield($product_data, craft_leather_table:productexp, 0));
+    mes("You make <db_getfield($product_data, craft_leather_table:name, 0)>.");
+    world_delay(1);
+    if_close;
+}

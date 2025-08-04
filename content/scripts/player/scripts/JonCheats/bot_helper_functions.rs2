@@ -1,0 +1,423 @@
+[proc,botwalk](coord $target)
+def_int $timestamp = map_clock;
+def_int $counter = 0;
+if(p_finduid(uid) = true){
+    p_walk($target);
+    while(coord ! $target & p_finduid(uid) = true){
+        if(add($timestamp, 20) < map_clock){
+            mes("Walking to <~coord_tostring($target)>");
+            p_finduid(uid);
+            p_walk($target);
+            $timestamp = map_clock;
+            $counter = calc($counter + 1);
+            if($counter > 2){
+                p_teleport($target);
+            }
+        }
+        world_delay(1);
+    }
+}else{
+    mes("fuck");
+}
+
+
+
+[proc,bot_oploc](coord $location, loc $locname, int $op_number)
+if(loc_find($location,$locname) = true & p_finduid(uid) = true){
+    facesquare($location);
+    p_oploc($op_number);
+    world_delay(1);
+}else{
+    mes("$locname not found");
+}
+return;
+
+
+
+
+[proc,botrun](int $runEnergyLimit,int $weightLimit, boolean $runOn)
+if(p_finduid(uid) = true){
+    if($runOn = true & runenergy() > calc($runEnergyLimit * 100) & weight() < calc($weightLimit * 1000)){
+        p_run(^player_run_on);
+    }
+    if($runOn = false & (runenergy() < calc($runEnergyLimit * 100) | weight() > calc($weightLimit * 1000))){
+        p_run(^player_run_off);
+    }
+}
+
+
+
+
+
+[proc,bot_bank_withdraw](coord $bankboothCoord, obj $item, int $requestedAmount)
+def_int $count = inv_total(bank, $item);
+if($count = 1){
+    return;
+}
+if($count < $requestedAmount){
+    $requestedAmount = calc($count - 1);
+}
+
+~bot_oploc($bankboothCoord, bankbooth, 2);
+~bank_withdraw_request(inv, $item, $requestedAmount, 0);
+world_delay(1);
+if_close;
+
+
+//inventory slot range is 1-28
+[proc,bot_bank_deposit](coord $bankboothCoord, int $inventorySlot)
+~bot_oploc($bankboothCoord, bankbooth, 2);
+
+world_delay(1);
+// Check if the slot was empty.
+def_obj $item = inv_getobj(inv, $inventorySlot);
+// How many have they got?
+def_int $number = inv_total(inv, $item);
+// Is it actually bankable?
+if (~bank_check_nobreak($item) = true) {
+    // custom handling here if needed.
+    return;
+}
+// Okay, deposit it into the bank.
+~bank_deposit_request(inv, $item, $number, $inventorySlot);
+world_delay(1);
+if_close;
+
+
+
+
+[proc,bot_bank_deposit_all](coord $bankboothCoord, int $starting_at)
+~bot_oploc($bankboothCoord, bankbooth, 2);
+
+def_int $slot = $starting_at;
+while($slot < 28){
+    def_obj $item = inv_getobj(inv,$slot);
+    if($item ! null){
+        ~bank_deposit_request(inv, $item, 999, $slot);
+        world_delay(1);
+    }
+    $slot = calc($slot + 1);
+}
+world_delay(1);
+if_close;
+
+
+
+
+[proc,bury]
+
+obj_takeitem(inv);
+mes("You dig a hole in the ground...");
+anim(human_pickupfloor, 0);
+sound_synth(bones_down, 1, 0);
+if(p_finduid(uid) = true){
+    p_stopaction;
+    p_delay(0);
+}
+
+def_int $invSlot = calc(27 - inv_freespace(inv));
+def_obj $last_item = inv_getobj(inv, $invSlot);
+inv_delslot(inv, $invSlot);
+
+stat_advance(prayer, oc_param($last_item, bone_exp));
+mes("You bury the bones.");
+world_delay(1);
+if_close;
+
+
+[proc,destroy]
+mes("destroying <obj_name>");
+obj_del;
+
+
+[proc,pick_up](int $delay)
+mes("picking up <obj_name>");
+obj_takeitem(inv);
+world_delay($delay);
+
+
+
+
+
+[debugproc,alch]
+//def_obj $item = cert_maple_longbow;
+def_obj $item = cert_yew_longbow;
+def_dbrow $spell_data = ~get_spell_data(^highlvl_alchemy);
+def_coord $startingSquare = coord;
+
+while(inv_total(inv, $item) > 0 & ~check_spell_requirements($spell_data) = true & $startingSquare = coord){
+    if(p_finduid(uid) = true){
+        ~magic_spell_high_alch(^highlvl_alchemy, $item);   
+        world_delay(1);
+        if_close;
+    }
+}
+
+
+
+[proc,magic_spell_high_alch](int $spell, obj $item)
+if_close;
+// look for spell in db
+def_dbrow $spell_data = ~get_spell_data($spell);
+if (~check_spell_requirements($spell_data) = false) {
+    return;
+}
+// prevent alchemy
+if (~is_alchable($item, $spell_data) = false) {
+    return;
+}
+// play sound and anim
+sound_synth(high_alchemy, 0, 0);
+anim(human_casthighlvlalchemy, 0);
+spotanim_pl(highlvlalchemy_casting, 92, 0);
+// delete runes and give xp
+~delete_spell_runes($spell_data);
+~give_spell_xp($spell_data);
+// give 0.6x of item's value and delete item
+def_int $profit = max(scale(6, 10, oc_cost($item)), 1);
+wealth_event(^wealth_high_alch, oc_debugname($item), 1, $profit);
+inv_del(inv, $item, 1);
+inv_add(inv, coins, $profit);
+// delay by 5 ticks
+if (afk_event = ^true) {
+    ~macro_event_general_spawn(~macro_event_set_random);
+}
+// https://oldschool.runescape.wiki/w/Update:Patch_Notes_(11_April_2013), in osrs it weakqueues the spell. Early osrs it was delay'd
+// https://www.neoseeker.com/forums/2410/t960058-useless-rs-facts/2.htm
+// > When you high alch while your cannon is spinning, it stops spinning until you finish alching
+// Also this video: https://www.youtube.com/watch?v=P_o3Cxg73Tg&t=91s
+//f_settabactive(^tab_magic);
+p_delay(3);
+
+
+[debugproc,heat]
+def_coord $starting_location = coord;
+
+while($starting_location = coord){
+    ~heat;
+    ~bot_bank_deposit_all(0_49_53_50_44,2);
+    ~bot_bank_withdraw(0_49_53_50_44, iron_ore, 27);
+}
+
+
+
+[proc,heat]
+def_obj $item = iron_ore;
+def_dbrow $spell_data = ~get_spell_data(^superheat_item);
+def_coord $startingSquare = coord;
+
+while(inv_total(inv, $item) > 0 & ~check_spell_requirements($spell_data) = true & $startingSquare = coord){
+    if(p_finduid(uid) = true){
+        ~magic_spell_superheat(^superheat_item, $item);  
+        world_delay(1);
+        if_close;
+    }
+}
+
+
+[proc,magic_spell_superheat](int $spell, obj $ore1)
+// look for spell in db
+def_dbrow $spell_data = ~get_spell_data($spell);
+if (~check_spell_requirements($spell_data)= false) {
+    return;
+}
+def_namedobj $bar = oc_param($ore1, smeltsto);
+// if player doesnt even superheat an ore
+if ($bar = null) {
+    sound_synth(superheat_fail, 0, 0);
+    spotanim_pl(failedspell_impact, 92, 0);
+    mes("You need to cast superheat item on ore.");
+    return;
+}
+// if player has 2 or more coal, then assume steel bar
+// Using superheat on coal doesnt make steel bars
+if ($ore1 = iron_ore & inv_total(inv, coal) > 1 & stat(smithing) >= 30) {
+    $ore1 = iron_ore;
+    $bar = steel_bar;
+}
+// remove bar at end of name
+def_string $metal_name = substring(oc_name($bar), 0, calc(string_length(oc_name($bar)) - 4));
+def_struct $bar_struct = oc_param($bar, smelting_struct);
+// Ensure ore1 now refers to the primary ingredient (important for bronze)
+$ore1 = struct_param($bar_struct, ingredient);
+// if not enough level
+if (stat(smithing) < struct_param($bar_struct, levelrequired)) {
+    mes("You need a smithing level of at least <tostring(struct_param($bar_struct, levelrequired))> to smelt <$metal_name>.");
+    return;
+}
+// If not enough ores
+def_int $ore_count1 = inv_total(inv, $ore1);
+def_namedobj $ore2 = struct_param($bar_struct, ingredient_secondary);
+def_int $ore_count2 = inv_total(inv, $ore2);
+if ($ore_count1 < 1 | $ore_count2 < struct_param($bar_struct, ingredient_secondary_count)) {
+    mes(struct_param($bar_struct, processfailure_superheat));
+    return;
+}
+// play sound and anim
+sound_synth(superheat_all, 0, 0);
+spotanim_pl(superheatitem_casting, 92, 0);
+anim(human_castsuperheatitem, 0);
+// delete runes and give xp
+~delete_spell_runes($spell_data);
+~give_spell_xp($spell_data);
+def_int $smith_xp = struct_param($bar_struct, productexp);
+if ($bar = gold_bar & inv_total(worn, gauntlets_of_goldsmithing) > 0) {
+    $smith_xp = scale(5, 2, $smith_xp); // 2.5x
+}
+stat_advance(smithing, $smith_xp);
+// delete ores and give bar
+inv_del(inv, $ore1, 1);
+if ($ore2 ! null) {
+    inv_del(inv, $ore2, struct_param($bar_struct, ingredient_secondary_count));
+}
+inv_add(inv, $bar, 1);
+//if_settabactive(^tab_magic);
+p_delay(1);
+
+if (afk_event = ^true) {
+    ~macro_event_general_spawn(~macro_event_set_random);
+    return;
+}
+
+
+
+
+
+
+[proc,bot_chatnpc](string $string)
+split_init($string, 380, 4, q8);
+def_int $page = 0;
+def_int $pagetotal = split_pagecount;
+while ($page < $pagetotal) {
+    ~chatnpc_page(npc_name, npc_type, $page);
+    facesquare(npc_coord);
+    if(npc_getmode ! opplayer2 & npc_getmode ! applayer2) npc_setmode(playerfaceclose);
+    world_delay(2);
+    $page = calc($page + 1);
+}
+
+
+
+[proc,bot_p_choice2](string $string1, int $ret1, string $string2, int $ret2, int $choice)(int)
+if_settext(multi2:com_0, "Select an Option");
+if_settext(multi2:com_1, $string1);
+if_settext(multi2:com_2, $string2);
+if_sethide(multi2:com_3, false);
+if_sethide(multi2:com_6, true);
+
+if_openchat(multi2);
+if_setresumebuttons(multi2:com_1, multi2:com_2, null, null, null);
+world_delay(2);
+
+switch_int ($choice) {
+    case 1 : return($ret1);
+    case default : return($ret2);
+}
+
+
+
+
+[proc,bot_p_choice3](string $string1, int $ret1, string $string2, int $ret2, string $string3, int $ret3, int $choice)(int)
+if_settext(multi3:com_0, "Select an Option");
+if_settext(multi3:com_1, $string1);
+if_settext(multi3:com_2, $string2);
+if_settext(multi3:com_3, $string3);
+if_sethide(multi3:com_4, false);
+if_sethide(multi3:com_7, true);
+
+if_openchat(multi3);
+if_setresumebuttons(multi3:com_1, multi3:com_2, multi3:com_3, null, null);
+world_delay(2);
+
+switch_int ($choice) {
+    case 1 : return($ret1);
+    case 2 : return($ret2);
+    case default : return($ret3);
+}
+
+
+
+
+[proc,bot_chatplayer](string $string)
+split_init($string, 380, 4, q8);
+def_int $page = 0;
+def_int $pagetotal = split_pagecount;
+while ($page < $pagetotal) {
+    ~chatplayer_page($page);
+    world_delay(2);
+    $page = calc($page + 1);
+}
+
+
+
+
+[proc,bot_mesbox](string $string)
+split_init($string, 470, 5, q8);
+def_int $page = 0;
+def_int $pagetotal = split_pagecount;
+while ($page < $pagetotal) {
+    ~mesbox_page($page);
+    world_delay(2);
+    $page = calc($page + 1);
+    if_close();
+}
+
+
+
+
+
+[proc,openbank]
+%bank_noted = 0;
+~reorganize_inv(bank);
+inv_transmit(inv, bank_side:inv);
+inv_transmit(bank, bank_main:inv);
+if_openmain_side(bank_main, bank_side);
+
+
+
+
+
+[proc,gear_check](obj $item, int $slot, string $item_name)(boolean)
+if(inv_getobj(worn,$slot) ! $item){
+    mes("you forgot your <$item_name>");
+    return(false);
+}else{
+    return(true);
+}
+    // worn //
+    //worn (0) = Head
+    //worn (1) = Cape
+    //worn (2) = Amulet
+    //worn (3) = weapon
+    //worn (4) = Chest
+    //worn (5) = Shield
+    //worn (6) = undefined
+    //worn (7) = Legs
+    //worn (8) = undefined
+    //worn (9) = Gloves
+    //worn (10) = Boots
+    //worn (11) = undefined
+    //worn (12) = Ring
+    //worn (13) = Arrow
+
+
+[proc,inv_check](obj $item, string $item_name)(boolean)
+if(inv_total(inv,$item) = 0){
+    mes("you forgot your <$item_name>");
+    return(false);
+}else{
+    return(true);
+}
+
+
+
+[proc,fill_container_water](obj $container)
+def_string $source_name = lowercase(loc_name);
+def_string $container_name = lowercase(oc_name($container));
+inv_del(inv, $container, 1);
+inv_add(inv, oc_param($container, next_obj_stage), 1);
+anim(human_pickuptable, 0);
+sound_synth(tap_fill, 0, 0);
+mes("You fill the <$container_name> from the <$source_name>.");
+// strongqueued in osrs but that was likely changed in Sept 2005 
+p_delay(0);

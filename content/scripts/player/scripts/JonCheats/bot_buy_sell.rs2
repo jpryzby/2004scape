@@ -1,0 +1,206 @@
+
+
+
+
+[debugproc,buy_arrow]
+//buy bronze arrows in varrok
+~buy_single_item(0_50_53_33_33, lowe, archeryshop, 0, 1910, bronze_arrow);
+
+//buy thread in al kharid
+[debugproc,buy_thread]
+~buy_single_item(0_51_49_57_58, dommik, craftingshop2, 5, 60, thread);
+
+//Buy feathers in port sarim
+[debugproc,buy_feathers]
+~buy_single_item(0_47_50_5_25, gerrant, fishingshop, 6, 960, feather);
+
+//Buy bait in catherby
+[debugproc,buy_bait]
+~buy_single_item(0_44_53_18_51, harry, fishingshop2, 4, 1170, fishing_bait);
+
+//Buy eye of newt in draynor
+[debugproc,buy_eye]
+~buy_nonstackable_item_far(0_47_50_7_59, betty, magicshop, 8, 0, eye_of_newt, 0_48_50_20_45, 0_48_50_19_45, 0_47_51_59_12);
+
+//Buy vials in Ardougne
+[debugproc,buy_vial1]
+~buy_nonstackable_item(0_40_51_54_30, aemad, adventurershop, 0, 0, vial_empty, 0_41_51_31_19, 0_41_51_32_19);
+
+
+
+//Buy and fill vials in Ardougne
+[debugproc,buy_vial]
+while(inv_total(inv, coins) > 100 & p_finduid(uid) = true){
+    ~botrun(0,999,true);
+    ~botwalk(0_40_51_54_30);
+    
+    if(npc_find(coord, aemad, 8, ^vis_off) = true & p_finduid(uid) = true){
+        mes("Found NPC");
+        p_opnpc(3);
+
+        while(inv_freespace(inv) > 0 & inv_total(inv, coins) > 100 & p_finduid(uid) = true){
+            if(inv_getnum(adventurershop, 0) > 4){
+                    ~buy_item(vial_empty, 5);
+                }
+                world_delay(1);
+        }
+        if_close;
+    }
+
+    ~botwalk(0_41_51_11_43);
+    ~bot_oploc(0_41_51_11_43,loc_1557,1);
+    ~botwalk(0_41_51_7_48);
+
+    while(inv_total(inv,vial_empty) > 0 & loc_find(0_41_51_5_47,loc_879) = true & p_finduid(uid) = true){
+        ~fill_container_water(vial_empty);
+    }
+
+    ~botwalk(0_41_51_11_44);
+    ~bot_oploc(0_41_51_11_43,loc_1557,1);
+    ~botwalk(0_41_51_31_19);
+    ~bot_bank_deposit_all(0_41_51_32_19,1);
+}
+
+
+
+//Buy empty vials in tavelry
+[debugproc,buy_vial2]
+while(inv_total(inv, coins) > 100 & p_finduid(uid) = true){
+    ~botwalk(0_45_53_56_58);
+    ~bot_oploc(0_45_53_55_45,loc_1597,1);
+    ~botwalk(0_45_53_21_36);
+
+    if(npc_find(coord, jatix, 8, ^vis_off) = true & p_finduid(uid) = true){
+        mes("Found NPC");
+        p_opnpc(3);
+
+        while(inv_freespace(inv) > 0 & inv_total(inv, coins) > 100 & p_finduid(uid) = true){
+            if(inv_getnum(herbloreshop, 0) > 0){
+                    ~buy_item(vial_empty, 5);
+                }
+                world_delay(1);
+        }
+        if_close;
+    }
+    ~botwalk(0_45_53_55_58);
+    ~bot_oploc(0_45_53_55_45,loc_1597,1);
+    ~botwalk(0_46_52_1_40);
+    ~bot_bank_deposit_all(0_46_52_1_39,1);
+}
+
+
+
+
+[proc,buy_nonstackable_item](coord $shop_location, npc $shop_npc, inv $shop_inv, int $item_slot, int $buy_down_number, obj $buying_item, coord $bank_walk_coord, coord $bank_coord)
+while(inv_total(inv, coins) > 100 & p_finduid(uid) = true){
+    ~botwalk($shop_location);
+    
+    if(npc_find(coord, $shop_npc, 8, ^vis_off) = true & p_finduid(uid) = true){
+        mes("Found NPC");
+        p_opnpc(3);
+
+        while(inv_freespace(inv) > 0 & inv_total(inv, coins) > 100 & p_finduid(uid) = true){
+            if(inv_getnum($shop_inv, $item_slot) > $buy_down_number){
+                    ~buy_item($buying_item, 5);
+                }
+                world_delay(1);
+        }
+        if_close;
+    }
+    ~botwalk($bank_walk_coord);
+    ~bot_bank_deposit_all($bank_coord,1);
+}
+
+
+
+
+[proc,buy_nonstackable_item_far](coord $shop_location, npc $shop_npc, inv $shop_inv, int $item_slot, int $buy_down_number, obj $buying_item, coord $bank_walk_coord, coord $bank_coord, coord $halfway)
+while(inv_total(inv, coins) > 100 & p_finduid(uid) = true){
+    ~botwalk($halfway);
+    ~botwalk($shop_location);
+    
+
+    if(npc_find(coord, $shop_npc, 8, ^vis_off) = true & p_finduid(uid) = true){
+        mes("Found NPC");
+        p_opnpc(3);
+
+        while(inv_freespace(inv) > 0 & inv_total(inv, coins) > 100 & p_finduid(uid) = true){
+            if(inv_getnum($shop_inv, $item_slot) > $buy_down_number){
+                    ~buy_item($buying_item, 5);
+                }
+                world_delay(1);
+        }
+        if_close;
+    }
+    ~botwalk($halfway);
+    ~botwalk($bank_walk_coord);
+    ~bot_bank_deposit_all($bank_coord,1);
+}
+
+
+
+
+
+
+
+
+[proc,buy_single_item](coord $shop_location, npc $shop_npc, inv $shop_inv, int $item_slot, int $buy_down_number, obj $buying_item)
+~botwalk($shop_location);
+
+if(npc_find(coord, $shop_npc, 8, ^vis_off) = true & p_finduid(uid) = true){
+    mes("Found NPC");
+    p_opnpc(3);
+
+    while(inv_total(inv, coins) > 3 & p_finduid(uid) = true){
+        if(inv_getnum($shop_inv, $item_slot) > $buy_down_number){
+            ~buy_item($buying_item, 5);
+        }
+        world_delay(1);
+    }
+    
+    mes("here");
+}
+
+
+
+
+
+[proc,buy_item](obj $obj, int $amount)
+def_int $i = 0;
+def_int $current_gp = inv_total(inv, coins);
+def_int $shop_stock = calc(inv_total(%shop, $obj));
+def_int $space_overflow = inv_itemspace2(inv, $obj, $amount, inv_size(inv));
+def_int $total_cost = 0;
+// Since pricing and stock will change constantly we will have to iterate here to calc
+while($i < $amount) {
+    def_int $added_amt = ~adjusted_item_cost_buying($obj, calc($shop_stock - $i));
+    def_int $current_stock = calc($shop_stock - $i);
+    if(calc($total_cost + $added_amt) > $current_gp) {
+        if ($i > 0) {
+            wealth_event(^wealth_shop_buy, oc_debugname($obj), $i, $total_cost);
+        }
+        mes("You don't have enough coins.");
+        return;
+    }
+    if($current_stock <= 0) {
+        if ($i > 0) {
+            wealth_event(^wealth_shop_buy, oc_debugname($obj), $i, $total_cost);
+        }
+        mes("The shop has run out of stock.");
+        return;
+    }
+    // do calc($total_cost + $added_amt) ! $current_gp for the case where the exact gp required for the purchase
+    // is used. Not sure if this should be the case in 2004
+    if($space_overflow >= calc($amount - $i) & calc($total_cost + $added_amt) ! $current_gp) {
+        if ($i > 0) {
+            wealth_event(^wealth_shop_buy, oc_debugname($obj), $i, $total_cost);
+        }
+        mes("You don't have enough inventory space.");
+        return;
+    }
+    $total_cost = calc($total_cost + $added_amt);
+    inv_del(inv, coins, $added_amt);
+    inv_moveitem_uncert(%shop, inv, $obj, 1);
+    $i = calc($i + 1);
+}
+wealth_event(^wealth_shop_buy, oc_debugname($obj), $i, $total_cost);

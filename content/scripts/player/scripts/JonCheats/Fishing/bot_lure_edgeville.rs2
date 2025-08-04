@@ -1,0 +1,79 @@
+[debugproc,lure]
+mes("Lure Fishing in Edgeville");
+
+if(~inv_check(feather, "feather") = true & ~inv_check(fly_fishing_rod, "fly_fishing_rod") = true){
+    while(inv_total(inv,feather) > 0){
+
+        ~botrun(50,999,true);
+        ~botwalk(0_48_53_33_41);
+
+        ~lure_edgeville;
+
+        ~botwalk(0_48_54_22_35);
+        ~bot_bank_deposit_all(0_48_54_23_35, 2);
+    }
+}
+
+
+
+
+
+
+[proc,lure_edgeville]
+while(inv_freespace(inv) > 0){
+
+        npc_findall(coord, 0_48_53_freshfish, 8, ^vis_off);         /////////replace npc_findall with npc_find(?)
+        if(npc_findnext() = true & p_finduid(uid) = true){
+
+            def_coord $fishing_spot_coord = npc_coord;
+            def_coord $standing_spot_coord = movecoord($fishing_spot_coord,-1,0,0);
+            
+            ~botwalk($standing_spot_coord);
+            facesquare($fishing_spot_coord);
+
+            ~attempt_fish_lure_edgeville;
+        }
+        world_delay(1);
+    }
+
+
+
+[proc,attempt_fish_lure_edgeville]
+// check level
+if (stat(fishing) < 20) {
+    anim(null, 0);
+    ~mesbox("You need at least 20 Fishing to lure these fish.");
+    return;
+}
+// check if they have fishing equipment & bait
+if (~check_fish_equipment(fly_fishing_rod) = false) {
+    return;
+}
+// matches this video 1:1 https://youtu.be/neAoU0yiGFY?t=16
+if (%action_delay < map_clock) {
+    %action_delay = calc(map_clock + 4);
+
+    world_delay(4);
+    p_opnpc(1);
+
+    while(inv_freespace(inv) > 0 & npc_find(coord, 0_48_53_freshfish, 1, ^vis_off) = true){
+        world_delay(1);
+        if_close;
+    }
+
+    world_delay(1);
+    if_close;
+    return;
+
+}
+if (%action_delay = calc(map_clock + 3)) {
+    anim(human_fishing_casting, 0);
+    mes("You cast out your line...");
+    p_opnpc(1);
+    return;
+}
+if (%action_delay = calc(map_clock + 2)) {
+    sound_synth(fishing_cast, 0, 0);
+    mes("You attempt to catch a fish.");
+}
+p_opnpc(4);

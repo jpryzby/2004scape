@@ -1,0 +1,68 @@
+
+[debugproc,smith]
+mes("Smithing");
+while(p_finduid(uid) = true){
+    ~botwalk(0_49_53_51_34);  //walk to anvil
+    facesquare(0_49_53_52_34);
+
+    if(p_finduid(uid) = true){
+        ~attempt_smithing(iron_knife, 26);
+    }
+
+    world_delay(1);
+    if_close;
+
+    ~botwalk(0_49_53_49_44);  //walk to bank
+    ~bot_bank_withdraw(0_49_53_50_44, iron_bar, 26);  //withdraw bars
+}
+
+
+
+
+[proc,attempt_smithing](obj $last_item, int $count)
+if_close;
+// get item data from db
+db_find(smithing:ifproduct, $last_item);
+def_dbrow $data = db_findnext;
+if ($data = null) {
+    ~displaymessage(^dm_default);
+    return;
+}
+// todo: check if they have tourist trap completed for dart tips
+// IT CHECKS FOR DARTS FIRST BTW (before members check)
+switch_obj(db_getfield($data,smithing:product,0)) {
+     case bronze_dart_tip, iron_dart_tip, steel_dart_tip, mithril_dart_tip, adamant_dart_tip, rune_dart_tip :
+         if (%desertrescue_progress < ^desertrescue_learned_darts) {
+             ~mesbox("You're not sure how to make darts yet.");
+             return;
+         }
+ }
+
+// check if mems obj is selected
+if (oc_members($last_item) = true & map_members = ^false) {
+    mes("You can only make that on a members' server.");
+    return;
+}
+// check if player has enough bars
+def_int $bar_amount = db_getfield($data,smithing:bar_amount,0);
+def_namedobj $bar = db_getfield($data, smithing:bar, 0);
+if (inv_total(inv, $bar) < $bar_amount) {
+    ~mesbox("You don't have enough <lowercase(oc_name($bar))>s to make <db_getfield($data,smithing:end_message,0)>."); // https://youtu.be/Xud7h207rZc?t=286
+    return;
+}
+// check if player has high enough level
+def_int $levelrequired = db_getfield($data,smithing:levelrequired,0);
+if (stat(smithing) < $levelrequired) {
+    ~mesbox("You need a Smithing level of <tostring($levelrequired)> to make <db_getfield($data,smithing:levelfailmessage,0)>.");
+    return;
+}
+// play anim and sound
+anim(human_smithing, 0);
+sound_synth(anvil_4, 0, 0);
+// delay player during whole smithing sesh
+// https://oldschool.runescape.wiki/w/Update:Dev_Blog:_Third_Old_School_RuneScape_Content_Poll
+if (%tutorial_progress < ^tutorial_complete) {
+    ~tut_smithing_anvil($count);
+} else {
+    ~smithing_anvil($data, $count);
+}

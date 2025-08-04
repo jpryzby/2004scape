@@ -1,0 +1,10 @@
+[debugproc,fill_vials]
+while(p_finduid(uid) = true){
+    ~botwalk(0_46_52_5_52);
+    while(inv_total(inv, vial_empty) > 0 & loc_find(0_46_52_5_53, loc_879) = true){
+        ~fill_container_water(vial_empty);
+    }
+    ~botwalk(0_46_52_1_40);
+    ~bot_bank_deposit_all(0_46_52_1_39,0);
+    ~bot_bank_withdraw(0_46_52_1_39, vial_empty, 28);
+}

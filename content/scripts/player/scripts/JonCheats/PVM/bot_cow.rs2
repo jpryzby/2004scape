@@ -1,0 +1,461 @@
+/////////////////////////////////////////
+////////// Crafting Guild Cows //////////
+/////////////////////////////////////////
+[debugproc,cow]
+mes("Running Crafting Guild Cow Bot");
+
+if(~cow_gear_check = true){
+    // Walk to cows
+    ~botwalk(0_45_51_44_28);
+    ~bot_oploc(0_45_51_44_28, loc_1551, 1);
+    ~botwalk(0_45_51_44_27);
+    ~bot_oploc(0_45_51_44_27, loc_1552, 1);
+    ~botwalk(0_45_51_44_23);
+
+
+    while(p_finduid(uid) = true){
+        while(inv_freespace(inv) > 0 & p_finduid(uid) = true){
+            def_coord $loot_coord = ~fight_cow;
+            ~loot_cow($loot_coord);
+            equip_arrows;
+        }
+        ~tan_hides_crafting_guild;
+        ~craft_coifs;
+        ~drop_items;
+        ~return_to_cows_crafting_guild;
+    }
+}else{
+    mes("here");
+}
+
+
+
+
+[proc,cow_gear_check]()(boolean)
+def_boolean $gear_check1 = ~gear_check(brown_apron, 4, "brown_apron");
+def_boolean $gear_check2 = ~inv_check(coins, "coins");
+def_boolean $gear_check3 = ~inv_check(thread, "thread");
+def_boolean $gear_check4 = ~inv_check(needle, "needle");
+
+if($gear_check1 = true & $gear_check2 = true & $gear_check3 = true & $gear_check4 = true){
+    return(true);
+}else{
+    return(false);
+}
+
+
+
+
+////////////////////////////////////
+////////// Al Kharid Cows //////////
+////////////////////////////////////
+[debugproc,cow2]
+mes("Running Al Kharid Cow Bot");
+
+// Walk to cows
+~botwalk(0_50_51_57_14);
+
+while(p_finduid(uid) = true){
+    //~equip(int $slot);
+    while(inv_freespace(inv) > 0 & p_finduid(uid) = true){
+        ~botrun(0,55,false);
+        def_coord $loot_coord = ~fight_cow;
+        ~loot_cow($loot_coord);
+    }
+    ~tan_hides;
+    ~return_to_cows;
+}
+
+
+
+
+////////////////////////////////
+////////// Fight Cows //////////
+////////////////////////////////
+[proc,fight_cow]()(coord)
+//if there are cows there
+def_coord $cowCoord = 0_0_0_0_0;
+if(npc_find(coord, cow, 20, 0) = true) {        
+
+    mes("found cow");
+
+    $cowCoord = npc_coord;
+    if(p_finduid(uid) = true){
+        p_opnpc(2);
+    }
+    
+    world_delay(8);
+    
+    // While in combat
+    while(add(%npc_lastcombat, 8) > map_clock){
+        $cowCoord = npc_coord;
+        mes("in combat");
+        world_delay(1);
+    }
+    mes("left combat");
+    if_close;
+
+////go to the spot
+    mes("going to the spot");
+    ~botwalk($cowCoord);
+    mes("arrived at spot");
+
+}else{
+    ~botwalk(0_50_51_60_11);
+}
+if_close;
+return($cowCoord);
+
+
+
+///////////////////////////////
+////////// Loot Cows //////////
+///////////////////////////////
+[proc,loot_cow](coord $cowCoord)
+mes("starting looting");
+
+obj_findallzone($cowCoord);
+while(obj_findnext() = true & inv_freespace(inv) > 0){
+    switch_obj(active_obj) {
+        case bones : ~bury;
+        
+        case raw_beef : ~destroy;
+        case cow_hide : ~pick_up(1);
+
+        case bronze_arrow : ~pick_up(0);
+        case bronze_knife : ~pick_up(0);
+        case iron_knife : ~pick_up(0);
+    }
+    obj_findallzone($cowCoord); 
+}
+
+
+
+////////////////////////////////////////////
+////////// Go to Al Kharid Tanner //////////
+////////////////////////////////////////////
+[proc,tan_hides]
+//walk to Tanner
+if(p_finduid(uid) = true){
+    ~botwalk(0_50_51_53_3);
+    ~bot_oploc(0_50_51_53_2,loc_1551,1);
+    ~botwalk(0_51_50_3_28);
+    ~pass_toll_gate(0_51_50_4_28);
+    ~botwalk(0_51_49_13_55);
+
+    //Talk to tanner
+    //if(npc_find(0_51_49_10_55, tanner, 6, 0) = true & p_finduid(uid) = true) {
+        //p_opnpc(1);
+        //world_delay(1);
+    //}
+
+    //tan hides
+    ~tan_soft_leather;
+
+    //Go to Bank 
+    ~botwalk(0_51_49_5_31);
+    ~bot_bank_deposit(0_51_49_4_31, 27);
+    if_close;
+}
+
+
+
+
+/////////////////////////////////////////////////
+////////// Go to Crafting Guild Tanner //////////
+/////////////////////////////////////////////////
+[proc,tan_hides_crafting_guild]
+//exit cow pen
+~botwalk(0_45_51_44_27);
+~bot_oploc(0_45_51_44_28, loc_1551, 1);
+~botwalk(0_45_51_44_28);
+~bot_oploc(0_45_51_44_27, loc_1552, 1);
+
+//Enter Crafting Guild
+~botwalk(0_45_51_53_25);
+~bot_oploc(0_45_51_53_25, crafting_guild_door, 1);
+if_close;
+
+//walk to stairs then climb
+~botwalk(0_45_51_52_20);
+~bot_oploc(0_45_51_51_18, loc_1738, 1);
+if_close;
+
+//walk to tanner
+if(npc_find(1_45_51_53_19, tanner, 6, 0) = true & p_finduid(uid) = true) {
+    p_opnpc(1);
+    world_delay(1);
+}
+
+//tan hides
+~tan_soft_leather;
+
+
+
+
+/////////////////////////////////////////////
+////////// Drop Hardleather Bodies //////////
+/////////////////////////////////////////////
+[proc,drop_items]
+mes("drop items");
+
+def_int $count = calc(28 - inv_total(inv,coif));
+while($count < 28){
+    inv_dropslot(inv, coord, $count, 200);
+    world_delay(1);
+    $count = calc($count + 1);
+}
+
+
+
+/////////////////////////////////////////////
+////////// Return to Al Kharid Cow //////////
+/////////////////////////////////////////////
+[proc,return_to_cows]
+~botrun(0,999,true);
+
+//walk to shantay gate 0_51_50_4_28
+~botwalk(0_51_50_4_28);
+
+//pass througn shantay gate
+
+~pass_toll_gate(0_51_50_4_28);
+
+
+
+//walk back to cow pen
+~botwalk(0_50_51_52_2);
+~bot_oploc(0_50_51_55_2, loc_1551, 1);
+~botwalk(0_50_51_57_14);
+
+
+
+///////////////////////////////////////////////////
+////////// Return to Crafting Guild Cows //////////
+///////////////////////////////////////////////////
+[proc,return_to_cows_crafting_guild]
+mes("resturn to cows");
+
+//walk to stairs, then down them
+~botwalk(1_45_51_53_18);
+~bot_oploc(1_45_51_52_18, loc_1740, 1);
+if_close;
+
+//walk to crafting guild door then exit
+~botwalk(0_45_51_53_24);
+~bot_oploc(0_45_51_53_25, crafting_guild_door, 1);
+
+//go to cow gate and open it
+~botwalk(0_45_51_44_28);
+~bot_oploc(0_45_51_44_28, loc_1551, 1);
+~botwalk(0_45_51_44_27);
+~bot_oploc(0_45_51_44_27, loc_1552, 1);
+
+//go to hunting spot
+~botwalk(0_45_51_44_23);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[proc,talk_to_border_guard](coord $loc_coord)
+// in early rs, paying 10gp will message "You pay the guard.".
+// osrs uses a different message. rsc uses this message.
+// https://youtu.be/gfWdQJH2Pmc?si=BKF8uqy1wLouzGCE&t=35
+// osrs using Pay-fare option on the gate gives different messages.
+~chatplayer("<p,quiz>Can I come through this gate?");
+
+if (%prince_progress >= ^prince_saved) {
+    ~chatnpc("<p,quiz>You may pass for free, you are a friend of Al-Kharid.");
+    ~pass_toll_gate($loc_coord);
+}
+
+~chatnpc("<p,quiz>You must pay a toll of 10 gold coins to pass.");
+
+def_int $choice = ~p_choice3("No thank you, I'll walk around.", 1, "Who does my money go to?", 2, "Yes, ok.", 3);
+if ($choice = 1) {
+    ~chatplayer("<p,quiz>No, thank you. I'll walk around.");
+    ~chatnpc("<p,quiz>Ok suit yourself.");
+    return;
+} else if ($choice = 2) {
+    ~chatplayer("<p,quiz>Who does my money go to?");
+    ~chatnpc("<p,quiz>The money goes to the city of Al-Kharid.");
+    return;
+}
+
+~chatplayer("<p,quiz>Yes, ok.");
+if (inv_total(inv, coins) < 10) {
+    ~chatplayer("<p,quiz>Oh dear, I don't actually seem to have enough money.");
+    return;
+}
+
+mes("You pay the guard.");
+inv_del(inv, coins, 10);
+~pass_toll_gate($loc_coord);
+
+[proc,pass_toll_gate](coord $loc_coord)
+if(p_finduid(uid) = true){
+    def_coord $coord = 0_51_50_4_27;
+    def_boolean $enter_east = false;
+
+    // checks if we are west of the gate on the lumbridge side
+    if (coordx(coord) < coordx($coord)) {
+        // if we are on the west side then our coord
+        // destination is moved over to the west
+        $coord = movecoord($coord, -1, 0, 0);
+        $enter_east = true;
+    }
+
+    if ($loc_coord ! null & distance(coord, $loc_coord) <= 1) {
+        if ($enter_east = false & (coord ! 0_51_50_4_28 & coord ! 0_51_50_4_27)) {
+            p_teleport($loc_coord);
+            p_stopaction;
+            p_delay(2);
+            ~enter_through_border_gate_toll($enter_east, $loc_coord);
+        } else {
+            p_stopaction;
+            p_delay(1);
+            ~enter_through_border_gate_toll($enter_east, $loc_coord);
+        }
+    }
+
+    p_delay(0);
+    ~forcemove($coord);
+    p_stopaction;
+    p_delay(0);
+    // open the gates and teleport through
+    ~enter_through_border_gate_toll($enter_east, $loc_coord);
+}
+
+
+// opens the gate and blocks all 4 sides
+// teleports us through the gate
+// plays the gates synth when opening
+// does magic
+[proc,enter_through_border_gate_toll](boolean $west, coord $loc_coord)
+def_coord $destination;
+if ($west = true) {
+    $destination = movecoord(coord, 1, 0, 0);
+    $loc_coord = $destination;
+} else {
+    if ($loc_coord = null) {
+        $destination = movecoord(coord, -1, 0, 0);
+        $loc_coord = coord;
+    } else {
+        $destination = movecoord($loc_coord, -1, 0, 0);
+    }
+}
+
+loc_findallzone($loc_coord);
+while (loc_findnext = true) {
+    if (loc_coord = $loc_coord & (loc_category = border_gate_toll_right | loc_category = border_gate_toll_left)) {
+        if (loc_category = border_gate_toll_left) {
+            ~open_border_gate_toll_left_closed;
+        } else {
+            ~open_border_gate_toll_right_closed;
+        }
+    }
+}
+
+sound_synth(grate_open, 0, 0);
+facesquare($destination);
+p_teleport($destination);
+p_stopaction;
+p_delay(0);
+
+
+
+[proc,tan_hard_leather]
+def_int $total_hides = inv_total(inv, cow_hide);
+if ($total_hides < 1) {
+    mes("You don't have any cowhide to tan."); // osrs
+    return;
+}
+def_int $coins = inv_total(inv, coins);
+if ($coins < ^tanner_hard_leather_cost) {
+    mes("You haven't got enough coins to pay for hard leather."); // osrs
+    return;
+}
+def_int $hides_to_be_tanned = min(divide($coins, ^tanner_hard_leather_cost), $total_hides);
+~tan_leather(cow_hide, hard_leather, ^tanner_hard_leather_cost);
+if ($hides_to_be_tanned = 1) {
+    mes("The tanner tans your cowhide."); // osrs
+} else {
+    mes("The tanner tans <tostring($hides_to_be_tanned)> cowhide for you.");
+}
+if (inv_total(inv, coins) < ^tanner_hard_leather_cost & $total_hides > $hides_to_be_tanned) {
+    mes("You haven't got enough coins to pay for more hard leather.");
+}
+world_delay(1);
+if_close;
+
+
+
+
+[proc,tan_soft_leather]
+def_int $total_hides = inv_total(inv, cow_hide);
+if ($total_hides < 1) {
+    mes("You don't have any cowhides to tan."); // osrs
+    return;
+}
+def_int $coins = inv_total(inv, coins);
+if ($coins < ^tanner_soft_leather_cost) {
+    mes("You haven't got enough coins to pay for soft leather."); // osrs
+    return;
+}
+def_int $hides_to_be_tanned = min(divide($coins, ^tanner_soft_leather_cost), $total_hides);
+~tan_leather(cow_hide, leather, ^tanner_soft_leather_cost);
+if ($hides_to_be_tanned = 1) {
+    mes("The tanner tans your cowhide."); // osrs
+} else {
+    mes("The tanner tans <tostring($hides_to_be_tanned)> cowhides for you.");
+}
+if (inv_total(inv, coins) < ^tanner_soft_leather_cost & $total_hides > $hides_to_be_tanned) {
+    mes("You haven't got enough coins to pay for more soft leather."); // https://youtu.be/Ta4z2QML0jc?t=37
+}

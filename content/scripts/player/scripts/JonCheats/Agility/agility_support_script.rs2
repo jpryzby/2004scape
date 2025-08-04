@@ -1,0 +1,21 @@
+[proc,agi_obst](coord $obst_start, coord $obst_coord, loc $obst_loc, int $delay)
+~botwalk($obst_start);
+~bot_oploc($obst_coord,$obst_loc,1);
+world_delay($delay);
+
+
+
+
+[proc,agi_obst_failable](coord $destination, coord $obst_start, coord $obst_coord, loc $obst_loc, int $delay, coord $fall_coord, boolean $underground)
+while(coord ! $destination){
+    ~agi_obst($obst_start, $obst_coord, $obst_loc, $delay);
+    //if we fall
+    if(coord = $fall_coord){
+        if($underground = true){
+            ~botwalk(0_46_161_61_58);
+            ~bot_oploc(0_46_161_61_59,loc_1755,1);
+        }
+    }else{
+        console("loc not found");
+    }
+}

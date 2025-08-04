@@ -1,0 +1,152 @@
+[debugproc,hunt_chaos_druid]
+while(p_finduid(uid) = true){
+    ~walk_to_chaos_druids;
+    ~hunt_chaos_druids;
+    ~walk_to_edge_bank;
+}
+
+
+
+
+
+[proc,walk_to_chaos_druids]
+~botrun(0,100,true);
+~botwalk(0_48_54_24_12);
+
+~bot_oploc(0_48_54_25_12,loc_1568,1);
+~bot_oploc(0_48_54_25_12,loc_1570,1);
+
+~botwalk(0_48_154_31_53);
+~bot_oploc(0_48_154_31_54,loc_1557,1);
+
+~botwalk(0_48_154_59_61);
+if_close;
+~bot_oploc(0_48_154_59_61,loc_1596,1);
+~botwalk(0_48_155_34_22);
+
+
+
+[proc,walk_to_edge_bank]
+~botwalk(0_48_154_59_62);
+~bot_oploc(0_48_154_59_61,loc_1596,1);
+
+~botwalk(0_48_154_32_54);
+~bot_oploc(0_48_154_31_54,loc_1557,1);
+
+~botwalk(0_48_154_24_12);
+~bot_oploc(0_48_154_24_11,loc_1755,1);
+
+~botwalk(0_48_54_22_35);
+~bot_bank_deposit_all(0_48_54_23_35,0);
+
+
+
+[proc,hunt_chaos_druids]
+while(inv_freespace(inv) > 0){
+    ~botrun(80,100,true);
+    def_coord $loot_coord = ~fight(chaos_druid);
+    ~loot_chaos_druid($loot_coord);
+    equip_arrows;
+}
+
+
+
+[proc,loot_chaos_druid](coord $druidCoord)
+obj_findallzone($druidCoord);
+while(obj_findnext() = true & inv_freespace(inv) > 0){//////////////////////////////this can be improved
+    ~botwalk($druidCoord);
+    switch_obj(active_obj) {
+        case bones : ~bury;
+
+        case vial_water : ~destroy;
+        case snape_grass : ~destroy;
+        case airrune : ~destroy;
+        case earthrune : ~destroy;
+        case mindrune : ~destroy;
+        case bodyrune : ~destroy;
+        case naturerune : ~destroy;
+        case lawrune : ~destroy;
+        case uncut_sapphire : ~destroy;
+        case uncut_emerald : ~destroy;
+        case bronze_longsword : ~destroy;
+        case coins : ~destroy;
+
+        case bronze_arrow : ~pick_up(0);
+        case bronze_knife : ~pick_up(0);
+        case iron_knife : ~pick_up(0);
+
+        case default : ~pick_up(1);
+    }
+    obj_findallzone($druidCoord); 
+}
+
+
+
+
+
+
+
+[proc,fight](npc $npc)(coord)
+def_coord $npcCoord = 0_0_0_0_0;
+
+///if under attack
+if(%aggressive_npc ! null & add(%lastcombat, 8) > map_clock){
+    if(npc_finduid(%aggressive_npc) = true){
+        mes("found");
+        $npcCoord = npc_coord;
+if(p_finduid(uid) = true){
+    p_opnpc(2);
+}
+
+world_delay(8);
+
+// While in combat
+while(add(%npc_lastcombat, 4) > map_clock){
+    $npcCoord = npc_coord;
+    mes("in combat");
+    world_delay(1);
+}
+mes("left combat");
+if_close;
+
+////go to the spot
+mes("going to the spot");
+~botwalk($npcCoord);
+mes("arrived at spot");
+
+
+if_close;
+return($npcCoord);
+    }else{
+        mes("not found");
+    }
+    
+    
+}else{
+    if(npc_find(coord, $npc, 20, 0) = true){
+ $npcCoord = npc_coord;
+if(p_finduid(uid) = true){
+    p_opnpc(2);
+}
+
+world_delay(8);
+
+// While in combat
+while(add(%npc_lastcombat, 8) > map_clock){
+    $npcCoord = npc_coord;
+    mes("in combat");
+    world_delay(1);
+}
+mes("left combat");
+if_close;
+
+////go to the spot
+mes("going to the spot");
+~botwalk($npcCoord);
+mes("arrived at spot");
+
+
+if_close;
+return($npcCoord);
+}
+}

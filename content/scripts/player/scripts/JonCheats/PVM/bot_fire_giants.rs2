@@ -1,0 +1,97 @@
+[debugproc,firegiant]
+mes("test loot");
+
+
+while(p_finduid(uid) = true){
+    mes("Fighting");
+    def_coord $loot_coord = ~fight_fire_giant;
+
+    mes("Looting");
+    ~loot_fire_giant($loot_coord);
+
+    mes("Reseting");
+}
+
+
+
+////////// Fight Fire Giants //////////
+[proc,fight_fire_giant]()(coord)
+
+~botrun(50,999,true);
+//go to safety spot//////////////////broken
+~botwalk(0_40_154_6_34);
+
+
+//find an enemy near 0_40_154_3_29
+if(npc_find(0_40_154_3_29, firegiant, 3, 0) = true){
+    //mes("found firegiant");
+
+    def_coord $giantCoord = npc_coord;
+    if(p_finduid(uid) = true){
+        p_opnpc(2);
+    }
+    world_delay(10);
+    
+    // While in combat
+    while(add(%npc_lastcombat, 8) > map_clock){
+
+        if(p_finduid(uid) = true & coord ! 0_40_154_6_34){
+            p_walk(0_40_154_6_34);
+            while(coord ! 0_40_154_6_34){
+                world_delay(1);
+                mes("walking back to safety spot");
+                p_telejump(0_40_154_6_34);
+                //p_walk(0_40_154_6_34); /////////////////////////////currently not working
+            }
+            p_opnpc(2);
+        }
+
+        $giantCoord = npc_coord;
+        //mes("in combat");
+        if_close;
+        world_delay(1);
+    }
+    //mes("left combat");
+    //~loot_fire_giant($giantCoord);
+
+    return ($giantCoord);
+}
+
+
+
+
+
+////////// Loot //////////
+[proc,loot_fire_giant](coord $giantCoord)
+
+obj_findallzone($giantCoord);
+while(obj_findnext() = true & inv_freespace(inv) > 0){
+    ~botwalk($giantCoord);
+    switch_obj(active_obj) {
+        case big_bones : ~bury;
+
+        case uncut_sapphire : ~destroy;
+        case uncut_emerald : ~destroy;
+        case lobster : ~destroy;
+        case steel_bar : ~destroy;
+        case steel_axe : ~destroy;
+        case 2dose1strength : ~destroy;
+        case unidentified_guam : ~destroy;
+        case unidentified_marrentill : ~destroy;
+        case unidentified_harralander : ~destroy;
+
+        case bronze_arrow : ~pick_up(0);
+        case bronze_knife : ~pick_up(0);
+        case iron_knife : ~pick_up(0);
+
+        case default : ~pick_up(1);
+    }
+    obj_findallzone($giantCoord); 
+}
+
+
+
+
+
+
+

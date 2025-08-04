@@ -1,0 +1,117 @@
+[debugproc,egg]
+mes("Eggy Test");
+
+//~asdf;
+//~craft_coifs1;
+//~fill_vials;
+
+//~bot_bank_deposit_all(0_50_53_53_27,0);
+~hunt_unicorn;
+
+
+
+
+
+[proc,hunt_unicorn]
+while(p_finduid(uid) = true){
+    ~walk_to_unicorns;
+    ~hunt_unicorns;
+    ~return_from_unicorn;
+
+    ~bot_bank_deposit_all(0_50_53_53_27,0);
+    ~temp_eat_trout;
+}
+
+
+
+
+
+
+[proc,walk_to_unicorns]
+~botwalk(0_50_53_47_57);
+~botwalk(0_50_54_46_21);
+~botwalk(0_50_54_44_59);
+if_close;
+~botwalk(0_50_55_44_37);
+~botwalk(0_50_56_13_31);
+~botwalk(0_50_56_12_51);
+~botwalk(0_50_57_17_28);
+
+
+
+[proc,return_from_unicorn]
+~botwalk(0_50_56_12_51);
+~botwalk(0_50_56_13_31);
+~botwalk(0_50_55_44_37);
+~botwalk(0_50_54_44_59);
+~botwalk(0_50_54_46_21);
+~botwalk(0_50_53_47_57);
+~botwalk(0_50_53_53_28);
+
+
+
+[proc,hunt_unicorns]
+while(inv_freespace(inv) > 0){
+    def_coord $loot_coord = ~fight(black_unicorn);
+    ~loot_unicorn($loot_coord);
+    equip_arrows;
+}
+
+[proc,loot_unicorn](coord $unicornCoord)
+obj_findallzone($unicornCoord);
+while(obj_findnext() = true & inv_freespace(inv) > 0){//////////////////////////////this can be improved
+    ~botwalk($unicornCoord);
+    switch_obj(active_obj) {
+        case bones : ~bury;
+        case default : ~pick_up(1);
+    }
+    obj_findallzone($unicornCoord); 
+}
+
+
+
+[proc,temp_eat_trout]
+def_obj $food = shrimp;
+mes("Health = <tostring(stat(hitpoints))>");
+if(stat(hitpoints) < 30){
+    mes("health low");
+
+    //withdraw food
+    ~bot_bank_withdraw(0_50_53_53_27,$food,15);
+    if_close;
+
+    while(inv_total(inv,$food) > 0){
+        ~eat_trout($food);
+        world_delay(3);
+    }
+}
+
+
+
+[proc,asdf]
+while(inv_total(inv, coins) > 100){
+    ~botwalk(0_46_53_16_19);
+    ~botwalk(0_45_53_56_58);
+    ~bot_oploc(0_45_53_55_58,loc_1597,1);
+    ~bot_oploc(0_45_53_55_58,loc_1558,1);
+    ~botwalk(0_45_53_21_36);
+
+    if(npc_find(coord, jatix, 8, ^vis_off) = true & p_finduid(uid) = true){
+        mes("Found NPC");
+        p_opnpc(3);
+
+        while(inv_freespace(inv) > 0 & inv_total(inv, coins) > 100){
+            if(inv_getnum(herbloreshop, 0) > 0){
+                    ~buy_item(vial_empty, 5);
+                }
+                world_delay(1);
+        }
+        if_close;
+    }
+    ~botwalk(0_45_53_55_58);
+    ~bot_oploc(0_45_53_55_58,loc_1597,1);
+    ~bot_oploc(0_45_53_55_58,loc_1558,1);
+    ~botwalk(0_46_53_16_19);
+    ~botwalk(0_46_52_1_40);
+    ~bot_bank_deposit_all(0_46_52_1_39,1);
+}

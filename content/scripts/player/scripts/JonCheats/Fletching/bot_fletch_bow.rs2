@@ -1,0 +1,75 @@
+[debugproc,fletch]
+mes("crafting maple longbow");
+
+//def_namedobj $logType = willow_logs;
+//def_namedobj $logType = maple_logs;
+def_namedobj $logType = yew_logs;
+//def_namedobj $logType = magic_logs;
+
+def_int $loop_count = 0;
+while(p_finduid(uid) = true){
+    mes("You have completed <tostring($loop_count)> runs");
+
+    ~bot_fletch_bow();
+    ~bot_bank_deposit(0_42_54_39_38, 27);
+    ~bot_bank_withdraw(0_42_54_39_38, $logType, 27);
+
+    $loop_count = calc($loop_count + 1);
+}
+
+
+
+
+[proc,bot_fletch_bow]
+
+//def_namedobj $bowType = willow_shortbow;
+//def_namedobj $bowType = willow_longbow;
+//def_namedobj $bowType = maple_shortbow;
+//def_namedobj $bowType = maple_longbow;
+//def_namedobj $bowType = yew_shortbow;
+def_namedobj $bowType = yew_longbow;
+//def_namedobj $bowType = magic_shortbow;
+//def_namedobj $bowType = magic_longbow;
+
+def_boolean $isLongbow = true;
+//def_boolean $isLongbow = false;
+
+
+def_int $inventory_slot = 0;
+while($inventory_slot < 27){
+
+    p_finduid(uid);
+    def_obj $log = inv_getobj(inv,27);
+    p_finduid(uid);
+
+    db_find(fletch_bow_table:log, $log);
+    def_dbrow $data = db_findnext;
+    if ($data = null) {
+        ~displaymessage(^dm_default);
+        return;
+    }
+
+    def_int $fletching_experience = 0;
+    def_int $level = 1;
+    def_namedobj $product = $bowType;
+    def_int $count = 1;
+    def_string $message = "";
+
+    if($isLongbow = true){
+        $message = "You carefully cut the wood into a longbow.";
+        $product, $level, $fletching_experience = db_getfield($data, fletch_bow_table:longbow, 0);
+    }else{
+        $message = "You carefully cut the wood into a shortbow.";
+        $product, $level, $fletching_experience = db_getfield($data, fletch_bow_table:shortbow, 0);
+    }
+
+    inv_del(inv, $log, 1);
+    mes($message);
+    stat_advance(fletching, $fletching_experience);
+    inv_add(inv, $product, $count);
+
+    world_delay(1);
+    if_close;
+
+    $inventory_slot = add($inventory_slot,1);
+}

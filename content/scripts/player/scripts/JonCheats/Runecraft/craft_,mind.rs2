@@ -1,0 +1,109 @@
+[debugproc,craft_mind]
+mes("craft mind rune");
+
+@craft_mind_start;
+
+[label,craft_mind_start]
+
+//Turn on Run
+~botrun(80,999,true);
+
+//Walk to the mind temple
+~botwalk(0_47_55_25_25);
+~botwalk(0_46_54_39_60);
+
+//enter the temple
+facesquare(0_46_54_38_58);
+if(p_finduid(uid) = true){
+    anim(human_pickupfloor, 0);
+    sound_synth(teleport_all, 0, 0);
+    mes("You hold the Mind talisman towards the mysterious ruins.");
+    mes("You feel a powerful force take hold of you...");
+    p_delay(1);
+    p_telejump(0_43_75_41_29);
+}
+
+//walk to the alter
+~botwalk(0_43_75_35_39);
+
+//craft the runes
+~bot_oploc(0_43_75_33_40, rc_mind_altar,1);
+
+
+
+[label,runecraft_mind_bot]
+def_dbrow $data = ~get_runecraft_data(loc_param(rune_type));
+if ($data = null) {
+    ~displaymessage(^dm_default);
+    return;
+}
+def_int $levelreq = db_getfield($data, runecraft_table:level, 0);
+def_namedobj $rune = db_getfield($data, runecraft_table:rune, 0);
+if (oc_members($rune) = true) {
+    if (map_members = ^false) {
+        mes(^mes_members_do_that); // guess
+        return;
+    }
+}
+def_int $level = stat(runecraft);
+if ($level < $levelreq) {
+    ~mesbox("You need a Runecrafting level of at least <tostring($levelreq)> to craft <oc_name($rune)>.");
+    return;
+}
+
+def_int $total_ess = inv_total(inv, blankrune);
+if ($total_ess = 0) {
+    // osrs has rune essences. But when mining rune ess in this version it says rune stones
+    // so this is just a guess
+    ~mesbox("You do not have any rune stones to bind.");
+    return;
+}
+
+anim(human_runecraft, 0);
+spotanim_pl(runecrafting, 96, 0);
+
+def_int $rune_count_per_ess = 1;
+if (db_getfieldcount($data, runecraft_table:multiplier) > 0) {
+    $rune_count_per_ess = calc($level / db_getfield($data, runecraft_table:multiplier, 0) + 1);
+}
+def_int $craft_count = calc($total_ess * $rune_count_per_ess);
+
+if(sub(^max_32bit_int, inv_total(inv, $rune)) < $craft_count) {
+    mes("You do not have enough inventory space to craft your essence into <lowercase(oc_name($rune))>s."); // osrs
+    return;
+}
+
+// if $craft_count uses free_space as the value, it may not round exactly to $rune_count_per_ess
+$total_ess = calc($craft_count / $rune_count_per_ess);
+
+inv_del(inv, blankrune, $total_ess);
+stat_advance(runecraft, calc($total_ess * db_getfield($data, runecraft_table:experience, 0)));
+// later revs they just use oc_name($rune), i think after 2007 or so
+mes("You bind the temple's power into <db_getfield($data, runecraft_table:name, 0)> Runes.");
+inv_add(inv, $rune, calc($total_ess * $rune_count_per_ess));
+world_delay(3);
+@deposit_mind;
+
+
+
+
+
+[label,deposit_mind]
+mes("walk to exit portal");
+//walk to exit portal
+~botwalk(0_43_75_41_28);
+
+//tele out
+~bot_oploc(0_43_75_41_27, rc_mind_altar_exit_portal,1);
+mes("finished tele out");
+
+//walk to bank
+~botwalk(0_47_55_25_25);
+~botwalk(0_48_54_24_38);
+
+//Deposit mind runes
+~bot_bank_deposit(0_48_54_24_37, 1);
+
+//withdraw rune essence
+~bank_withdraw_request(inv, blankrune, 27, 27);
+@craft_mind_start;

@@ -1,0 +1,93 @@
+[debugproc,bait]
+while(p_finduid(uid) = true){
+    ~botrun(50,999,true);
+    while(inv_freespace(inv) > 0){
+
+        
+
+        ~botwalk(0_44_53_32_39);
+
+        npc_findall(coord, 0_44_53_saltfish, 15, ^vis_off);
+        if(npc_findnext() = true & p_finduid(uid) = true){
+            mes("npc found <npc_name>");
+            def_coord $fishing_spot_coord = npc_coord;
+            def_coord $standing_spot_coord = movecoord($fishing_spot_coord,0,0,1);
+
+            
+
+
+            ~botwalk($standing_spot_coord);
+            facesquare($fishing_spot_coord);
+            mes("before fish");
+            ~attempt_fish_sardine;
+            mes("after fish");
+        }
+        mes("here");
+    }
+
+
+    ~botwalk(0_43_53_57_49);
+    ~bot_bank_deposit_all(0_43_53_57_50,2);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+[proc,attempt_fish_sardine]
+// check level
+if (stat(fishing) < 5) {
+    anim(null, 0);
+    ~mesbox("You need at least 5 Fishing to catch these fish.");
+    return;
+}
+// check if they have fishing equipment
+if (~check_fish_equipment(fishing_rod) = false) {
+    return;
+}
+// check if inv is full
+if (inv_freespace(inv) < 1 & inv_total(inv, fishing_bait) > 1) {
+    anim(null, 0);
+    ~mesbox("You can't carry any more fish.");
+    return;
+}
+if (%action_delay < map_clock) {
+    %action_delay = calc(map_clock + 5);
+    world_delay(5);
+    mes("asdfas");
+    p_opnpc(3);
+
+    while(inv_freespace(inv) > 0 & npc_find(coord, 0_44_53_saltfish, 1, ^vis_off) = true){
+        world_delay(1);
+        if_close;
+    }
+
+    world_delay(1);
+    if_close;
+    return;
+} 
+if (%action_delay = calc(map_clock + 4)) {
+    mes("You cast out your line...");
+    anim(human_fishing_casting, 0);
+    p_opnpc(3);
+    return;
+} else if (%action_delay = calc(map_clock + 3)) {
+    mes("You attempt to catch a fish.");
+    sound_synth(fishing_cast, 0, 0);
+    p_opnpc(5);
+} else if (%action_delay = map_clock) {
+    anim(human_fish_onspot, 0);
+    if (stat(fishing) >= 10) {
+        ~fish_roll(raw_sardine, raw_herring, fishing_rod, fishing_bait);
+    } else {
+        ~fish_roll(raw_sardine, null, fishing_rod, fishing_bait);
+    }
+}
