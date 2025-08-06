@@ -1,0 +1,77 @@
+[debugproc,hunt_hobgoblin]
+while(p_finduid(uid) = true){
+    ~walk_to_hobgoblins;
+    ~hunt_hobgoblins;
+    ~return_from_hobgoblins;
+
+    ~bot_bank_deposit_all(0_47_52_4_26,0);
+    ~bot_heal(0_47_52_4_26);
+}
+
+
+
+
+
+[proc,walk_to_hobgoblins]
+~botwalk(0_46_51_62_54);
+~botwalk(0_46_51_16_14);
+~botwalk(0_45_50_49_63);
+~botwalk(0_45_51_28_24);
+
+
+
+[proc,return_from_hobgoblins]
+~botwalk(0_45_50_49_63);
+~botwalk(0_46_51_16_14);
+~botwalk(0_46_51_62_54);
+~botwalk(0_47_52_4_27);
+
+
+
+[proc,hunt_hobgoblins]
+while(inv_freespace(inv) > 0 & stat(hitpoints) > 15 & p_finduid(uid) = true){
+    def_coord $loot_coord = ~fight(hobgoblin_unarmed);
+    ~loot_hobgoblin($loot_coord);
+    equip_arrows;
+}
+
+
+
+[proc,loot_hobgoblin](coord $hobgobCoord)
+obj_findallzone($hobgobCoord);
+while(obj_findnext() = true & inv_freespace(inv) > 0){//////////////////////////////this can be improved
+    ~botwalk($hobgobCoord);
+    switch_obj(active_obj) {
+        case bones : ~bury;
+
+        case bronze_spear : ~destroy;
+        case iron_spear : ~destroy;
+        case steel_spear : ~destroy;
+        case iron_sword : ~destroy;
+        case steel_dagger : ~destroy;
+        case steel_longsword : ~destroy;
+        case unidentified_guam : ~destroy;
+        case unidentified_marrentill : ~destroy;
+        case unidentified_tarromin : ~destroy;
+        case unidentified_harralander : ~destroy;
+        case waterrune : ~destroy;
+        case firerune : ~destroy;
+        case bodyrune : ~destroy;
+        case chaosrune : ~destroy;
+        case naturerune : ~destroy;
+        case lawrune : ~destroy;
+        case cosmicrune : ~destroy;
+        case coins : ~destroy;
+        case snape_grass : ~destroy;
+        case goblin_armour : ~destroy;
+        case uncut_sapphire : ~destroy;
+        case uncut_emerald : ~destroy;
+
+        case bronze_arrow : ~pick_up(0);
+        case bronze_knife : ~pick_up(0);
+        case iron_knife : ~pick_up(0);
+
+        case default : ~pick_up(1);
+    }
+    obj_findallzone($hobgobCoord); 
+}

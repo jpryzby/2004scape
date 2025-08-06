@@ -421,3 +421,20 @@ sound_synth(tap_fill, 0, 0);
 mes("You fill the <$container_name> from the <$source_name>.");
 // strongqueued in osrs but that was likely changed in Sept 2005 
 p_delay(0);
+
+
+
+[proc,bot_heal](coord $bank_coord)
+def_obj $food = shrimp;
+def_int $heal_amount = 3;
+def_int $amount_to_heal = calc(stat_base(hitpoints) - stat(hitpoints)); 
+def_int $food_withdraw_quantity = calc($amount_to_heal / $heal_amount);
+
+//withdraw food
+~bot_bank_withdraw($bank_coord,$food,$food_withdraw_quantity);
+if_close;
+
+while(inv_total(inv,$food) > 0){
+    ~eat_trout($food);
+    world_delay(3);
+}

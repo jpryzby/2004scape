@@ -1,0 +1,56 @@
+[debugproc,hunt_unicorn]
+while(p_finduid(uid) = true){
+    ~walk_to_unicorns;
+    ~hunt_unicorns;
+    ~return_from_unicorn;
+
+    ~bot_bank_deposit_all(0_50_53_53_27,0);
+    ~bot_heal(0_50_53_53_27);
+}
+
+
+
+
+
+[proc,walk_to_unicorns]
+~botwalk(0_50_53_47_57);
+~botwalk(0_50_54_46_21);
+~botwalk(0_50_54_44_59);
+if_close;
+~botwalk(0_50_55_44_37);
+~botwalk(0_50_56_13_31);
+~botwalk(0_50_56_12_51);
+~botwalk(0_50_57_17_28);
+
+
+
+[proc,return_from_unicorn]
+~botwalk(0_50_56_12_51);
+~botwalk(0_50_56_13_31);
+~botwalk(0_50_55_44_37);
+~botwalk(0_50_54_44_59);
+~botwalk(0_50_54_46_21);
+~botwalk(0_50_53_47_57);
+~botwalk(0_50_53_53_28);
+
+
+
+[proc,hunt_unicorns]
+while(inv_freespace(inv) > 0){
+    def_coord $loot_coord = ~fight(black_unicorn);
+    ~loot_unicorn($loot_coord);
+    equip_arrows;
+}
+
+
+
+[proc,loot_unicorn](coord $unicornCoord)
+obj_findallzone($unicornCoord);
+while(obj_findnext() = true & inv_freespace(inv) > 0){//////////////////////////////this can be improved
+    ~botwalk($unicornCoord);
+    switch_obj(active_obj) {
+        case bones : ~bury;
+        case default : ~pick_up(1);
+    }
+    obj_findallzone($unicornCoord); 
+}
