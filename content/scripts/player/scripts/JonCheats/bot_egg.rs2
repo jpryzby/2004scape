@@ -1,2 +1,58 @@
 [debugproc,egg]
 mes("Eggy Test");
+//~gather_spider_eggs;
+
+
+
+[debugproc,grind_unicorn_horn]
+while(inv_total(bank,unicorn_horn) > 1){
+    def_int $slot = 1;
+    while(inv_total(inv,unicorn_horn) > 0){
+        ~attempt_grind_ingredient(0, $slot);
+        world_delay(1);
+        $slot = calc($slot + 1);
+    }
+
+    ~bot_bank_deposit_all(0_46_52_1_39,1);
+    ~bot_bank_withdraw(0_46_52_1_39,unicorn_horn,27);
+}
+
+
+
+
+
+[proc,gather_spider_eggs]
+~walk_to_red_spiders;
+
+while(inv_freespace(inv) > 0 & p_finduid(uid) = true){/////////////////////////////////
+    obj_findallzone(coord);
+    while(obj_findnext() = true & inv_freespace(inv) > 0){
+        switch_obj(active_obj) {
+            case red_spiders_eggs : ~pick_up(1);
+            case default : ~destroy;
+        }
+        obj_findallzone(movecoord(coord, -1, 0, 0));
+    }
+    world_delay(1);
+}
+
+~walk_to_edge_bank;
+~bot_bank_deposit_all(0_48_54_23_35,0);
+~bot_heal(0_48_54_23_35);
+
+
+
+[proc,walk_to_red_spiders]
+~botrun(0,100,true);
+~botwalk(0_48_54_24_12);
+
+~bot_oploc(0_48_54_25_12,loc_1568,1);
+~bot_oploc(0_48_54_25_12,loc_1570,1);
+
+~botwalk(0_48_154_31_53);
+~bot_oploc(0_48_154_31_54,loc_1557,1);
+
+~botwalk(0_48_154_59_61);
+if_close;
+~bot_oploc(0_48_154_59_61,loc_1596,1);
+~botwalk(0_48_155_56_35);

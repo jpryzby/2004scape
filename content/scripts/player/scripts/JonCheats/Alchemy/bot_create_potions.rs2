@@ -1,21 +1,121 @@
 [debugproc,make_potion]
-~make_potion(guam_leaf,eye_of_newt);
+//~make_potion(guam_leaf,eye_of_newt);          //Attack Potion
+//~make_potion(Marentill,unicorn_horn_dust);    //Antipoison
+~make_potion(tarromin,limpwurt_root);         //Strength Potion
+//~make_potion(harralander,red_spiders_eggs);   //Restore Potion
+//~make_potion(harralander,chocolate_dust);     //Energy Potion
+//~make_potion(ranarr_weed,white_berries);      //Defense Potion
+//~make_potion(ranarr_weed,snape_grass);        //Prayer Potion
+//~make_potion(irit_leaf,eye_of_newt);          //Super Attack Potion
+//~make_potion(avantoe,snape_grass);            //Fishing Potion
+//~make_potion(kwuarm,limpwurt_root);           //Super Strength Potion
+//~make_potion(kwuarm,dragon_scale_dust);       //Weapon Poison
+//~make_potion(cadantine,white_berries);        //Super Defense Potion
+//~make_potion(lantadyme,dragon_scale_dust);    //Antifire Potion
+//~make_potion(dwarf_weed,wine_of_zamorak);     //Ranging Potion
+//~make_potion(torstol,jangerberries);          //Zamorak brew Potion
+
+
+
+
 
 [proc,make_potion](namedobj $herb, namedobj $secondary_ingredient)
+while(p_finduid(uid) = true){
+    def_obj $unid = inv_getobj(inv,0);
+    def_int $count = 0;
+    while($count < 14 & p_finduid(uid) = true){
+        ~attempt_identify_herb($herb, $count);
+        ~attempt_brew_potion($count, calc($count + 14));
+        world_delay(1);
+        $count = calc($count + 1);
+    }
 
-def_int $count = 0;
-while($count < 14 & p_finduid(uid) = true){
-    ~attempt_identify_herb($herb, $count);
-    ~attempt_brew_potion($count, calc($count + 14));
-    world_delay(1);
-    $count = calc($count + 1);
+    ~bot_bank_withdraw(0_46_52_1_39,$secondary_ingredient,14);
+
+    $count = 0;
+    while(inv_total(inv, $secondary_ingredient) > 0 & p_finduid(uid) = true){
+        ~attempt_brew_potion($count, calc($count + 14));
+        world_delay(1);
+        if_close;
+        $count = calc($count + 1);
+    }
+
+    ~bot_bank_deposit_all(0_46_52_1_39,0);
+    ~bot_bank_withdraw(0_46_52_1_39,$unid,14);
+    ~bot_bank_withdraw(0_46_52_1_39,vial_water,14);
 }
 
-~bot_bank_withdraw(0_46_52_2_39,$secondary_ingredient,14);
 
-$count = 0;
-while(inv_total(inv, $secondary_ingredient) > 0 & p_finduid(uid) = true){
-    ~attempt_brew_potion($count, calc($count + 14));
-    world_delay(1);
-    $count = calc($count + 1);
+
+
+
+[debugproc,combine_potions]
+def_obj $origin_potion1 = inv_getobj(inv, 0);
+mes("here");
+while(inv_total(inv,$origin_potion1) > 4 & p_finduid(uid) = true){
+    def_int $row = 0;
+    def_int $slot = calc($row * 4);
+    
+
+    while($row < 7 & p_finduid(uid) = true){
+        $slot = calc($row * 4);
+
+        def_obj $origin_potion = inv_getobj(inv, $slot);
+        def_obj $destination_potion = inv_getobj(inv, calc($slot + 1));
+        ~decant_potion($destination_potion, $origin_potion,calc($slot + 1),$slot);
+        world_delay(1);
+
+        $origin_potion = inv_getobj(inv, $slot);
+        $destination_potion = inv_getobj(inv, calc($slot + 2));
+        ~decant_potion($destination_potion, $origin_potion,calc($slot + 2),$slot);
+        world_delay(1);
+
+        $origin_potion = inv_getobj(inv, $slot);
+        $destination_potion = inv_getobj(inv, calc($slot + 3));
+        ~decant_potion($destination_potion, $origin_potion,calc($slot + 3),$slot);
+        world_delay(1);
+
+        $row = calc($row + 1);
+    }
+
+    ~bot_bank_deposit_all(0_46_52_1_39,0);
+    ~bot_bank_withdraw(0_46_52_1_39, $origin_potion1, 28);
 }
+
+
+
+
+
+
+
+
+[proc,decant_potion](obj $potion, obj $used_potion, int $origin_slot, int $destination_slot)
+def_enum $potion_enum = ~get_potion_type($potion, $used_potion);
+if ($potion_enum = null) {
+    ~displaymessage(^dm_default);
+    return;
+}
+def_int $doses = oc_param($potion, dose_count);
+def_int $used_doses = oc_param($used_potion, dose_count);
+if($doses = 4 | $used_doses = 4) {
+    ~displaymessage(^dm_default); // we can't decant with a 4 dose pot
+    return;
+}
+def_int $total_doses = calc($doses + $used_doses);
+def_int $remainder_doses = 0;
+if($total_doses > 4) {
+    $remainder_doses = calc($total_doses - 4);
+    $total_doses = 4;
+}
+def_namedobj $decanted_potion = enum(int, namedobj, $potion_enum, $total_doses);
+def_namedobj $remainder_potion = vial_empty;
+if($remainder_doses > 0) {
+    $remainder_potion = enum(int, namedobj, $potion_enum, $remainder_doses);
+}
+inv_setslot(inv, $origin_slot, $decanted_potion, 1);
+inv_setslot(inv, $destination_slot, $remainder_potion, 1);
+
+sound_synth(liquid, 0, 0); // osrs
+// https://youtu.be/qGcENRGIcoI?si=qGubXr8z_G3aDeaI&t=12
+mes("You have combined the liquid into <tostring($total_doses)> doses.");
+

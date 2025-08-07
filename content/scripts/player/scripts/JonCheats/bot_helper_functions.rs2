@@ -425,8 +425,8 @@ p_delay(0);
 
 
 [proc,bot_heal](coord $bank_coord)
-def_obj $food = shrimp;
-def_int $heal_amount = 3;
+def_obj $food = trout;
+def_int $heal_amount = 7;
 def_int $amount_to_heal = calc(stat_base(hitpoints) - stat(hitpoints)); 
 def_int $food_withdraw_quantity = calc($amount_to_heal / $heal_amount);
 
