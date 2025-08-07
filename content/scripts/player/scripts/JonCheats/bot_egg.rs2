@@ -1,29 +1,2 @@
 [debugproc,egg]
 mes("Eggy Test");
-
-~make_potion(guam_leaf,eye_of_newt);
-//~attempt_identify_herb(guam_leaf, 1);
-
-[proc,make_potion](namedobj $herb, namedobj $secondary_ingredient)
-
-def_int $count = 0;
-while($count < 14 & p_finduid(uid) = true){
-    ~attempt_identify_herb($herb, $count);
-
-
-
-    ~attempt_brew_potion($count, calc($count + 14));
-
-
-
-    world_delay(1);
-    $count = calc($count + 1);
-}
-
-~bot_bank_withdraw(0_46_52_2_39,$secondary_ingredient,14);
-
-$count = 0;
-while(inv_total(inv, $secondary_ingredient) > 0 & p_finduid(uid) = true){
-    ~attempt_brew_potion($count, calc($count + 14));
-    $count = calc($count + 1);
-}
