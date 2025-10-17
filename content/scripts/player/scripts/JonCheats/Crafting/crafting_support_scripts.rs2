@@ -46,3 +46,57 @@ if(p_finduid(uid) = true){
     world_delay(1);
     if_close;
 }
+
+
+
+
+[proc,craft_jewelery](namedobj $jewelry_obj,namedobj $product,int $count)
+//def_namedobj $jewelry_obj = unstrung_gold_amulet;
+
+if(p_finduid(uid) = true){
+    // check if mems objs are selected
+    if ($jewelry_obj = invis_amulet5 | $jewelry_obj = invis_necklace5 | $jewelry_obj = invis_ring5) {
+        if (map_members = ^false) {
+            mes(^mes_members_feature);
+            return;
+        }
+    }
+    //mes(oc_debugname($jewelry_obj));
+    def_struct $struct = oc_param($jewelry_obj, crafting_jewelry_struct);
+    def_int $level = 34;
+    if (stat(crafting) < $level) {
+        if_close;
+        ~mesbox("You need at least level <tostring($level)> Crafting to make that.");
+        return;
+    }
+    // macro event
+    if (afk_event = ^true) {
+        ~macro_event_general_spawn(~macro_event_set_random);
+        return;
+    }
+    def_namedobj $gem = ruby;
+    // ****** FOR WEAKQUEUE *******
+    // // make sure the player doesnt produce more than they can
+    // // the gem_total is only 0 when the player selects gold crafting
+    // def_int $gem_total = inv_total(inv,  struct_param($struct, gem));
+    // if ($gem_total = 0) {
+    //     $count = min($count, inv_total(inv, gold_bar));
+    // } else {
+    //     $count = min(min($count, inv_total(inv, gold_bar)), $gem_total);
+    // }
+    // ****** FOR WEAKQUEUE *******
+    
+    def_int $productexp = struct_param($struct, productexp);
+
+    // mes(oc_debugname($jewelry_obj));
+    if_close;
+    anim(human_furnace, 0);
+    sound_synth(furnace, 0, 0);
+    p_delay(2);
+
+    ~crafting_gold($product, $gem, $productexp, $count);
+    // weakqueue(crafting_gold, 1, $productexp, $gem, $jewelry_obj, $count);
+    //----------------------
+}
+world_delay(1);
+if_close;

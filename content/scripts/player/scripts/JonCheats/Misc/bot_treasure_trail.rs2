@@ -1,0 +1,128 @@
+[proc,clue_scroll_easy]
+mes("Gathering Easy Clue Scrolls");
+
+~botrun(0,999,true);
+~botwalk(0_48_54_29_53);
+~bot_oploc(0_48_54_29_53,loc_1516,1);
+~botwalk(0_48_54_28_53);
+~bot_oploc(0_48_54_28_53,loc_1517,1);
+
+~botwalk(0_48_54_23_54);
+
+while(p_finduid(uid) = true & inv_freespace(inv) > 0){
+    ~loot_man(~fight_man(man,3));
+    ~loot_man(~fight_man(man2,3));
+    ~loot_man(~fight_man(man3,3));
+    world_delay(1);
+}
+~deposit_loot_from_men;
+
+
+
+[proc,fight_man](npc $npc, int $range)(coord)
+def_coord $npcCoord = coord;
+
+if(npc_find(0_48_54_25_54, $npc, $range, 0) = true){
+    if(p_finduid(uid) = true){
+        p_opnpc(2);
+    }
+    // While in combat
+    while(p_finduid(uid) = true & npc_stat(hitpoints) > 0){
+        mes("in combat");
+        p_opnpc(2);
+        world_delay(1);
+    }
+    if_close;
+
+    return(npc_coord);
+}
+if(npc_find(0_48_54_21_54, $npc, $range, 0) = true){
+    if(p_finduid(uid) = true){
+        p_opnpc(2);
+    }
+    // While in combat
+    while(p_finduid(uid) = true & npc_stat(hitpoints) > 0){
+        mes("in combat");
+        p_opnpc(2);
+        world_delay(1);
+    }
+    if_close;
+
+    return(npc_coord);
+}
+
+
+
+
+[proc,loot_man](coord $npc_coord)
+if($npc_coord = null){
+    return;
+}
+world_delay(2);
+//~botwalk($npc_coord);
+obj_findallzone($npc_coord);
+while(p_finduid(uid) = true & obj_findnext() = true & inv_freespace(inv) > 0){//////////////////////////////this can be improved
+    switch_obj(active_obj) {
+        case bones : ~destroy;
+
+        case unidentified_guam : ~destroy;
+        case unidentified_marrentill : ~destroy;
+        case unidentified_tarromin : ~destroy;
+        case unidentified_harralander : ~destroy;
+        case unidentified_ranarr : ~destroy;
+        case unidentified_irit : ~destroy;
+        case unidentified_avantoe : ~destroy;
+        case unidentified_kwuarm : ~destroy;
+        case unidentified_cadantine : ~destroy;
+        case unidentified_lantadyme : ~destroy;
+        case unidentified_dwarf_weed : ~destroy;
+
+        case coins : ~destroy;
+        case fishing_bait : ~destroy;
+        case iron_dagger : ~destroy;
+        case bronze_med_helm : ~destroy;
+        case bolt : ~destroy;
+        case copper_ore : ~destroy;
+        case earth_talisman : ~destroy;
+        case cabbage : ~destroy;
+        case mindrune : ~destroy;
+        case chaosrune : ~destroy;
+        case earthrune : ~destroy;
+        case firerune : ~destroy;
+        
+
+        case bronze_arrow : ~pick_up(0);
+        case iron_arrow : ~pick_up(0);
+        case iron_knife : ~pick_up(0);
+
+        case default : ~pick_up(1);
+    }
+    obj_findallzone($npc_coord); 
+}
+equip_arrows;
+
+
+
+
+[proc,deposit_loot_from_men]
+~botwalk(0_48_54_28_53);
+~bot_oploc(0_48_54_29_53,loc_1516,1);
+~botwalk(0_48_54_29_53);
+~bot_oploc(0_48_54_28_53,loc_1517,1);
+
+~botwalk(0_48_54_24_38);
+~bot_bank_deposit_all(0_48_54_24_37,0);
+
+
+
+
+
+
+//if(inv_total(inv,trail_clue_easy_map001) > 0){
+//    ~magic_teleport(^varrock_teleport);
+//    ~botwalk(0_50_53_12_3);
+//    ~botwalk(0_49_52_42_32);
+//    ~dig;
+//    world_delay(1);
+    //~_trail_casket_easy;
+//}

@@ -1,0 +1,24 @@
+
+[debugproc,make_gold_amulet]
+mes("smelting Gold into Amulets");
+
+~botwalk(0_46_52_1_41);
+~botwalk(0_46_52_1_40);
+
+~bot_bank_deposit_all(0_46_52_1_39,0);
+~bot_bank_withdraw(0_46_52_1_39,amulet_mould,1);
+
+while(p_finduid(uid) = true & inv_total(bank,gold_ore) > 1){
+    ~bot_bank_withdraw(0_46_52_1_39,gold_ore,27);
+    
+    ~botwalk(0_46_52_30_42);
+    facesquare(0_46_52_31_40);
+    while(inv_total(inv,gold_ore) > 0 & p_finduid(uid) = true){
+        ~bot_smithing_furnace(gold_ore);
+        ~craft_jewelery(unstrung_gold_amulet,unstrung_gold_amulet,1);
+    }
+    
+
+    ~botwalk(0_46_52_1_40);
+    ~bot_bank_deposit_all(0_46_52_1_39,1);
+}

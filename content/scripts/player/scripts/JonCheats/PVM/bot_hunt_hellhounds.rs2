@@ -1,71 +1,16 @@
-
 [debugproc,hunt_hellhounds]
 mes("Hunting Hellhounds");
 
-~walk_to_hellhounds;
+def_coord $safespot = 0_44_153_37_51;
+~botwalk($safespot);
 
-while(p_finduid(uid) = true & stat(hitpoints) > 25){
-    ~walk_to_safe_spot(0_42_151_43_18);
-    def_coord $loot_coord = ~fight_with_safespot(0_42_151_43_18, hellhound, 6);
-    ~loot_hellhound($loot_coord);
-    world_delay(1);
+while(p_finduid(uid) = true){
+    def_coord $npcCoord = ~fight_with_safespot($safespot, hellhound, 10);
+    ~loot_hellhound($npcCoord);
 }
 
 
 
-[proc,walk_to_hellhounds]
-~botwalk(0_42_151_43_18);
-
-
-[proc,fight_hellhound]()(coord)
-~botwalk(0_42_151_43_18);
-
-///if under attack
-if(%aggressive_npc ! null & add(%lastcombat, 8) > map_clock){
-    if(npc_finduid(%aggressive_npc) = true){
-        mes("found");
-        if(p_finduid(uid) = true){
-            p_opnpc(2);
-        }
-
-        // While in combat
-        while(p_finduid(uid) = true & npc_stat(hitpoints) > 0){
-            if(coord ! 0_42_151_43_18){
-                ~walk_to_safe_spot(0_42_151_43_18);
-            }
-            p_opnpc(2);
-            world_delay(1);
-        }
-        if_close;
-
-        return(npc_coord);
-    }else{
-        mes("not found");
-        world_delay(1);
-    }
-    
-}else{
-    if(npc_find(0_42_151_47_20, hellhound, 5, 0) = true){
-        if(p_finduid(uid) = true){
-            p_opnpc(2);
-        }
-
-        // While in combat
-        while(p_finduid(uid) = true & npc_stat(hitpoints) > 0){
-            if(coord ! 0_42_151_43_18){
-                ~walk_to_safe_spot(0_42_151_43_18);
-            }
-            p_opnpc(2);
-            world_delay(1);
-        }
-        if_close;
-
-        return(npc_coord);
-    }else{
-        mes("Waiting for Enemy respawns");
-        world_delay(5);
-    }
-}
 
 
 [proc,loot_hellhound](coord $enemy_Coord)

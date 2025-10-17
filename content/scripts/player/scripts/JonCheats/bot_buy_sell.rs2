@@ -305,15 +305,31 @@ console("done looping");
 
 
 
-[proc,unequip_all]
-~unequip(^wearpos_hat);
-~unequip(^wearpos_back);
-~unequip(^wearpos_front);
-~unequip(^wearpos_rhand);
-~unequip(^wearpos_torso);
-~unequip(^wearpos_lhand);
-~unequip(^wearpos_legs);
-~unequip(^wearpos_hands);
-~unequip(^wearpos_feet);
-~unequip(^wearpos_ring);
-~unequip(^wearpos_quiver);
+[proc,buy_varrok]
+mes("Buying from the shops in Varrok");
+while(inv_total(inv,coins) > 100){
+    ~bot_open_shop(0_50_53_33_33, lowe);
+    while(inv_getnum(archeryshop, 0) > 1910 & inv_getnum(archeryshop, 1) > 1475 & p_finduid(uid) = true & inv_total(inv,coins) > 1000){
+        ~buy_stackable_item(archeryshop, 0, 1910, bronze_arrow);
+        ~buy_stackable_item(archeryshop, 1, 1475, iron_arrow);
+        world_delay(1);
+    }
+    if_close;
+
+
+    ~bot_open_shop(0_50_53_53_9, aubury);
+    while(inv_getnum(runeshop, 0) > 1980 & inv_getnum(runeshop, 1) > 1980 & inv_getnum(runeshop, 2) > 1980 & inv_getnum(runeshop, 3) > 1980 & inv_getnum(runeshop, 4) > 975 & inv_total(inv, coins) > 1000 & p_finduid(uid) = true){
+        ~buy_stackable_item(runeshop, 0, 1980, firerune);
+        ~buy_stackable_item(runeshop, 1, 1980, waterrune);
+        ~buy_stackable_item(runeshop, 2, 1980, airrune);
+        ~buy_stackable_item(runeshop, 3, 1980, earthrune);
+        ~buy_stackable_item(runeshop, 4, 975, mindrune);
+        ~buy_stackable_item(runeshop, 6, 499, chaosrune);
+        ~buy_stackable_item(runeshop, 7, 499, deathrune);
+
+        world_delay(1);
+    }
+    world_delay(1);
+    if_close;
+}
+
