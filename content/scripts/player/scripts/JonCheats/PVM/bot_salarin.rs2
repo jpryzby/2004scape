@@ -1,0 +1,242 @@
+[debugproc,hunt_salarin]
+mes("Hunting Salarin");
+
+//setup gear
+~gear_setup_salarin;
+
+while(p_finduid(uid) = true){
+    ~walk_to_salarin;
+    ~hunt_salarin_and_druids;
+
+    ~deposit_loot_from_salarin;
+    ~bot_heal(0_42_54_39_38);
+    world_delay(1);
+}
+
+
+
+
+[proc,hunt_salarin_and_druids]
+while(p_finduid(uid) = true & inv_freespace(inv) > 0 & stat(hitpoints) > 25 & inv_total(inv,firerune) > 0 & inv_total(inv,mindrune) > 0){
+    ~hunt_salarin2;
+    ~hunt_salarin_druids;
+    world_delay(1);
+}
+
+
+[proc,gear_setup_salarin]
+~botwalk(0_46_52_1_41);
+~botwalk(0_46_52_1_40);
+~bot_bank_deposit_all(0_46_52_1_39,0);
+
+~unequip_all;
+~bot_bank_deposit_all(0_46_52_1_39,0);
+
+~bot_bank_withdraw(0_46_52_1_39,firerune,^max_32bit_int);
+~bot_bank_withdraw(0_46_52_1_39,mindrune,^max_32bit_int);
+~bot_bank_withdraw(0_46_52_1_39,lawrune,^max_32bit_int);
+~bot_bank_withdraw(0_46_52_1_39,dragon_longsword,1);
+~bot_bank_withdraw(0_46_52_1_39,earthrune,2);
+
+~bot_bank_withdraw(0_46_52_1_39,ikov_bootsoflightness,1);
+~bot_bank_withdraw(0_46_52_1_39,air_battlestaff,1);
+~bot_bank_withdraw(0_46_52_1_39,ring_of_wealth,1);
+~bot_bank_withdraw(0_46_52_1_39,gnome_hat_pink,1);
+~bot_bank_withdraw(0_46_52_1_39,black_robe,1);
+~bot_bank_withdraw(0_46_52_1_39,gnome_robebottoms_pink,1);
+~bot_bank_withdraw(0_46_52_1_39,red_cape,1);
+~bot_bank_withdraw(0_46_52_1_39,antidragonbreathshield,1);
+
+if(inv_total(bank,air_battlestaff) > 1){
+    ~bot_bank_withdraw2(0_46_52_1_39,air_battlestaff,1);
+}else if(inv_total(bank,staff_of_air) > 1){
+    ~bot_bank_withdraw2(0_46_52_1_39,staff_of_air,1);
+}
+
+if(inv_total(bank,amulet_of_glory_1) > 0){
+    ~bot_bank_withdraw2(0_46_52_1_39,amulet_of_glory_1,1);
+}else if(inv_total(bank,amulet_of_glory_2) > 0){
+    ~bot_bank_withdraw2(0_46_52_1_39,amulet_of_glory_2,1);
+}else if(inv_total(bank,amulet_of_glory_3) > 0){
+    ~bot_bank_withdraw2(0_46_52_1_39,amulet_of_glory_3,1);
+}else if(inv_total(bank,amulet_of_glory_4) > 1){
+    ~bot_bank_withdraw2(0_46_52_1_39,amulet_of_glory_4,1);
+}else if(inv_total(bank,amulet_of_glory) > 0){
+    ~bot_bank_withdraw2(0_46_52_1_39,amulet_of_glory,1);
+}
+
+~try_equip(5);
+~try_equip(6);
+~try_equip(7);
+~try_equip(8);
+~try_equip(9);
+~try_equip(10);
+~try_equip(11);
+~try_equip(12);
+~try_equip(13);
+
+
+
+
+[proc,walk_to_salarin]
+~magic_teleport(^watchtower_teleport);
+~botwalk(2_45_73_53_40);
+~bot_oploc(2_45_73_53_39,loc_2797,1);
+
+~botwalk(1_39_48_48_40);
+~bot_oploc(1_39_48_48_39,loc_1746,1);
+
+~botwalk(0_40_48_9_45);
+if(inv_getobj(worn,^wearpos_rhand) ! dragon_longsword){
+    ~equip(3);
+}
+while(loc_find(0_40_48_9_46,loc_733) = true & p_finduid(uid) = true){
+    ~bot_oploc(0_40_48_9_46,loc_733,1);
+}
+~equip(3);
+
+~botwalk(0_40_48_9_49);
+~bot_oploc(0_40_48_9_50,loc_1733,1);
+
+~botwalk(0_40_148_20_48);
+~bot_oploc(0_40_148_20_47,loc_2303,1);
+world_delay(10);
+
+~botwalk(0_40_148_38_22);
+~bot_oploc(0_40_148_38_22,loc_2321,1);
+world_delay(10);
+
+~botwalk(0_40_148_60_24);
+~bot_oploc(0_40_148_60_24,loc_2321,1);
+world_delay(10);
+
+~botwalk(0_40_148_60_24);
+~bot_oploc(0_40_148_60_25,loc_1728,1);
+
+~botwalk(0_40_149_57_35);
+~bot_oploc(0_40_149_56_36,loc_2317,1);
+
+~botwalk(0_40_148_55_42);
+
+
+
+[proc,hunt_salarin2]
+if(npc_find(coord, salarin_the_twisted, 15, ^vis_off) = true & p_finduid(uid) = true){
+    //if(inv_getobj(worn,^wearpos_rhand) ! air_battlestaff & inv_getobj(worn,^wearpos_rhand) ! staff_of_air){
+    //    ~equip(3);
+    //}
+    ~set_autocast_spell(^fire_strike);
+    %attackstyle_magic = 3;
+    ~botrun(0,999,true);
+
+    //~start_combat_salarin;
+    //~walk_to_safe_spot(0_40_148_54_42);
+    def_coord $npcCoord = ~fight_salarin;
+    ~loot_salarin($npcCoord);
+} 
+
+
+
+[proc,hunt_salarin_druids]
+~set_attackstyle(1);
+if(inv_getobj(worn,^wearpos_rhand) ! dragon_longsword){
+    ~equip(3);
+}
+if(npc_find(coord, chaos_druid, 8, ^vis_off) = true & p_finduid(uid) = true){
+    def_coord $loot_coord = ~fight(chaos_druid,20,0_40_148_55_42);
+    ~loot_salarin($loot_coord);
+}
+
+
+
+[proc,loot_salarin](coord $npcCoord)
+world_delay(2);
+~botwalk($npcCoord);
+obj_findallzone($npcCoord);
+while(p_finduid(uid) = true & obj_findnext() = true & inv_freespace(inv) > 0){//////////////////////////////this can be improved
+    ~botwalk($npcCoord);
+    switch_obj(active_obj) {
+        //case bones : ~bury(bones);
+
+        //case coins : ~destroy;
+        //case bodyrune : ~destroy;
+        //case airrune : ~destroy;
+        //case waterrune : ~destroy;
+        //case earthrune : ~destroy;
+        //case naturerune : ~destroy;
+        //case 1dose2defense : ~destroy;
+        //case bronze_longsword : ~destroy;
+
+        //case unidentified_guam : ~destroy;
+        //case unidentified_marrentill : ~destroy;
+        //case unidentified_tarromin : ~destroy;
+        //case unidentified_harralander : ~destroy;
+        //case unidentified_irit : ~destroy;
+        //case unidentified_avantoe : ~destroy;
+
+        //case white_berries : ~destroy;
+        //case snape_grass : ~destroy;
+        //case vial_water : ~destroy;
+
+        //case black_dagger : ~destroy;
+
+        //case uncut_sapphire : ~destroy;
+        //case uncut_emerald : ~destroy;
+        //case uncut_ruby : ~destroy;
+        //case uncut_diamond : ~destroy;
+
+        //case bronze_arrow : ~pick_up(0);
+        //case iron_arrow : ~pick_up(0);
+        //case iron_knife : ~pick_up(0);
+
+        //case default : ~pick_up(1);
+        case sinister_key : ~pick_up(1);
+        case default : ~destroy;
+    }
+    obj_findallzone($npcCoord); 
+}
+equip_arrows;
+
+
+[proc,start_combat_salarin]
+while(p_finduid(uid) = true & npc_stat(hitpoints) = npc_basestat(hitpoints)){
+    p_opnpc(2);
+    world_delay(1);
+}
+
+
+
+
+[proc,walk_to_safe_spot](coord $dest)
+while(coord ! $dest & p_finduid(uid) = true){
+    p_clearpendingaction;
+    p_walk($dest);
+    p_clearpendingaction;
+    world_delay(1);
+}
+
+
+
+[proc,fight_salarin]()(coord)
+p_opnpc(2);
+while(p_finduid(uid) = true & npc_stat(hitpoints) > 0){
+    mes("in combat");
+    p_opnpc(2);
+    world_delay(2);
+    if(coord ! 0_40_148_54_42){
+        ~walk_to_safe_spot(0_40_148_54_42);
+    }
+}
+if_close;
+return(npc_coord);
+
+
+
+[proc,deposit_loot_from_salarin]
+if(inv_getobj(worn,^wearpos_rhand) ! air_battlestaff & inv_getobj(worn,^wearpos_rhand) ! staff_of_air){
+    ~equip(3);
+}
+~magic_teleport(^camelot_teleport);
+~botwalk(0_42_54_39_37);
+~bot_bank_deposit_all(0_42_54_39_38,4);
+~bot_bank_withdraw(0_42_54_39_38,earthrune,2);

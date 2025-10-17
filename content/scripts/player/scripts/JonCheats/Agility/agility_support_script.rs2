@@ -6,8 +6,8 @@ world_delay($delay);
 
 
 
-[proc,agi_obst_failable](coord $destination, coord $obst_start, coord $obst_coord, loc $obst_loc, int $delay, coord $fall_coord, boolean $underground)
-while(coord ! $destination){
+[proc,agi_obst_failable](coord $destination, coord $obst_start, coord $obst_coord, loc $obst_loc, int $delay, coord $fall_coord, boolean $underground, obj $food)
+while(coord ! $destination & p_finduid(uid) = true){
     ~agi_obst($obst_start, $obst_coord, $obst_loc, $delay);
     //if we fall
     if(coord = $fall_coord){
@@ -15,7 +15,15 @@ while(coord ! $destination){
             ~botwalk(0_46_161_61_58);
             ~bot_oploc(0_46_161_61_59,loc_1755,1);
         }
-    }else{
-        console("loc not found");
+        world_delay(1);
+        if(stat(hitpoints) < 20){
+            if(inv_total(inv,$food) > 0){
+                while(stat(hitpoints) < 30 & inv_total(inv,$food) > 0 & p_finduid(uid) = true){
+                    ~bot_eat($food);
+                }
+            }else{
+                ~wilderness_agi_food_check($food);
+            }
+        }
     }
 }

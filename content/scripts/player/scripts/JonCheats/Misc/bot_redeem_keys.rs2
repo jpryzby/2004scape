@@ -1,0 +1,134 @@
+[debugproc,redeem_keys]
+mes("redeeming sinister keys");
+
+~gear_check_redeem_keys;
+while(inv_total(bank,sinister_key) > 1){
+    ~walk_to_sinister_chest;
+    ~open_sinister_chest;
+    ~deposit_from_sinister_chest;
+}
+
+
+
+
+
+[proc,gear_check_redeem_keys]
+~botwalk(0_46_52_1_41);
+~botwalk(0_46_52_1_40);
+~bot_bank_deposit_all(0_46_52_1_39,0);
+
+~unequip_all;
+~bot_bank_deposit_all(0_46_52_1_39,0);
+
+~bot_bank_withdraw(0_46_52_1_39,lawrune,^max_32bit_int);
+~bot_bank_withdraw(0_46_52_1_39,waterrune,^max_32bit_int);
+~bot_bank_withdraw(0_46_52_1_39,earthrune,^max_32bit_int);
+~bot_bank_withdraw(0_46_52_1_39,dragon_dagger_p,1);
+
+~bot_bank_withdraw(0_46_52_1_39,ikov_bootsoflightness,1);
+
+if(inv_total(bank,air_battlestaff) > 1){
+    ~bot_bank_withdraw2(0_46_52_1_39,air_battlestaff,1);
+}else if(inv_total(bank,staff_of_air) > 1){
+    ~bot_bank_withdraw2(0_46_52_1_39,staff_of_air,1);
+}
+
+~bot_bank_withdraw(0_46_52_1_39,ring_of_wealth,1);
+
+if(inv_total(bank,amulet_of_glory_1) > 1){
+    ~bot_bank_withdraw(0_46_52_1_39,amulet_of_glory_1,1);
+}else if(inv_total(bank,amulet_of_glory_2) > 1){
+    ~bot_bank_withdraw(0_46_52_1_39,amulet_of_glory_2,1);
+}else if(inv_total(bank,amulet_of_glory_3) > 1){
+    ~bot_bank_withdraw(0_46_52_1_39,amulet_of_glory_3,1);
+}else if(inv_total(bank,amulet_of_glory_4) > 1){
+    ~bot_bank_withdraw(0_46_52_1_39,amulet_of_glory_4,1);
+}
+
+~try_equip(4);
+~try_equip(5);
+~try_equip(6);
+~try_equip(7);
+~try_equip(8);
+
+world_delay(1);
+buildappearance(worn);
+
+
+
+
+[proc,walk_to_sinister_chest]
+~bot_bank_withdraw(0_46_52_1_39,sinister_key,2);
+~magic_teleport(^watchtower_teleport);
+
+~botwalk(2_45_73_53_40);
+~bot_oploc(2_45_73_53_39,loc_2797,1);
+
+~botwalk(1_39_48_48_40);
+~bot_oploc(1_39_48_48_39,loc_1746,1);
+
+~botwalk(0_40_48_9_45);
+if(inv_getobj(worn,^wearpos_rhand) ! dragon_dagger_p){
+    ~equip(3);
+}
+while(loc_find(0_40_48_9_46,loc_733) = true & p_finduid(uid) = true){
+    ~bot_oploc(0_40_48_9_46,loc_733,1);
+}
+~equip(3);
+
+~botwalk(0_40_48_9_49);
+~bot_oploc(0_40_48_9_50,loc_1733,1);
+
+~botwalk(0_40_148_20_48);
+~bot_oploc(0_40_148_20_47,loc_2303,1);
+world_delay(10);
+
+~botwalk(0_40_148_18_34);
+~bot_oploc(0_40_148_16_34,loc_2290,1);
+world_delay(10);
+
+~botwalk(0_40_148_2_35);
+
+
+
+[proc,open_sinister_chest]
+while(inv_total(inv,sinister_key) > 0 & p_finduid(uid) = true & loc_find(0_40_148_1_35,loc_377) = true) {
+    mes("you unlock the chest with your key...");
+    p_delay(3);
+    mes("A foul gas seeps from the chest");
+    sound_synth(gas_hiss, 0, 0);
+    if(%poison < 0) {
+        mes("Luckily your poison antidote saves you from harm.");
+    } else {
+        queue(poison_player, 0, 27);
+    }
+    mes("You find a lot of herbs in the chest...");
+    inv_del(inv, sinister_key, 1);
+    inv_add(inv, unidentified_harralander, 2);
+    inv_add(inv, unidentified_ranarr, 3);
+    inv_add(inv, unidentified_irit, 1);
+    inv_add(inv, unidentified_avantoe, 1);
+    inv_add(inv, unidentified_kwuarm, 1);
+    inv_add(inv, unidentified_torstol, 1);
+    // Temp note: dur updated
+    loc_change(chestopen_inactive, 5);
+    world_delay(3);
+}
+world_delay(1);
+
+
+
+[proc,deposit_from_sinister_chest]
+if(inv_getobj(worn,^wearpos_rhand) ! air_battlestaff & inv_getobj(worn,^wearpos_rhand) ! staff_of_air){
+    ~equip(3);
+}
+world_delay(1);
+~magic_teleport(^falador_teleport);
+
+~botwalk(0_46_52_1_40);
+~bot_bank_deposit_all(0_46_52_1_39,4);
+
+~bot_cure_poison(4);
+~bot_bank_deposit_all(0_46_52_1_39,4);
+
+~bot_heal(0_46_52_1_39);

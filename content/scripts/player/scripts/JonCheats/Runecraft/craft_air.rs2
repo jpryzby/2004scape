@@ -4,7 +4,7 @@ mes("craft air rune");
 
 
 
-while(inv_getobj(inv, 27) ! air_talisman){
+while(p_finduid(uid) = true & inv_getobj(inv, 27) ! air_talisman){
     ~walk_to_air_alter;
     ~craft_air_rune;
     ~bank_air_rune;

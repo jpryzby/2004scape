@@ -1,0 +1,6 @@
+[debugproc,ardy_sewer]
+~botwalk(0_41_151_31_51);
+while(p_finduid(uid) = true){
+    ~bot_oploc(0_41_151_31_51,east_ardy_sewer_gate_north,2);
+    world_delay(1);
+}

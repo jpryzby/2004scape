@@ -2,7 +2,7 @@
 [debugproc,net]
 while(p_finduid(uid) = true){
     ~botrun(50,999,true);
-    while(inv_freespace(inv) > 0){
+    while(inv_freespace(inv) > 0 & p_finduid(uid) = true){
 
         ~botwalk(0_44_53_32_39);
 
@@ -18,7 +18,6 @@ while(p_finduid(uid) = true){
             ~attempt_fish_shrimp;
             mes("after fish");
         }
-        mes("here");
     }
 
     ~botwalk(0_43_53_57_49);
@@ -39,7 +38,6 @@ while(p_finduid(uid) = true){
 [proc,attempt_fish_shrimp]
 // check if they have fishing equipment
 if (~check_fish_equipment(net) = false) {
-    mes("here1");
     return;
 }
 // check if inv is full
@@ -51,10 +49,9 @@ if (inv_freespace(inv) < 1) {
 if (%action_delay < map_clock) {
     %action_delay = calc(map_clock + 4);
     world_delay(4);
-    mes("asdfas");
     p_opnpc(1);
 
-    while(inv_freespace(inv) > 0 & npc_find(coord, 0_44_53_saltfish, 1, ^vis_off) = true){
+    while(inv_freespace(inv) > 0 & npc_find(coord, 0_44_53_saltfish, 1, ^vis_off) = true & p_finduid(uid) = true){
         world_delay(1);
         mes("waiting");
         if_close;
@@ -70,7 +67,6 @@ if (%action_delay = calc(map_clock + 3)) {
     sound_synth(net, 0, 0);
     p_opnpc(4);
 } else if (%action_delay = map_clock) {
-    mes("here3");
     // doesnt play anim here
     if (stat(fishing) >= 15) {
         ~fish_roll(raw_shrimp, raw_anchovies, net, null);
@@ -78,4 +74,3 @@ if (%action_delay = calc(map_clock + 3)) {
         ~fish_roll(raw_shrimp, null, net, null);
     }
 }
-mes("here4");

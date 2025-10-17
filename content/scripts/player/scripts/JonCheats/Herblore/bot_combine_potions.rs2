@@ -1,0 +1,151 @@
+[debugproc,combine_potions]
+~combine_all_potions;
+
+[proc,combine_all_potions]
+mes("Combining all potions in Falador");
+~botwalk(0_46_52_1_41);
+~botwalk(0_46_52_1_40);
+~bot_bank_deposit_all(0_46_52_1_39,0);
+
+~combine_potions(3dose1attack);
+~combine_potions(3doseantipoison);
+~combine_potions(3dose1strength);
+~combine_potions(3dosestatrestore);
+~combine_potions(3dose1defense);
+~combine_potions(3doseprayerrestore);
+~combine_potions(3dose2attack);
+~combine_potions(3dosefisherspotion);
+~combine_potions(3dose2strength);
+~combine_potions(3dose2defense);
+~combine_potions(3dose1antidragon);
+~combine_potions(3doserangerspotion);
+~combine_potions(3dosepotionofzamorak);
+~combine_all_potions2;
+
+
+
+[proc,combine_potions](obj $mixing_potion)
+def_int $banked_potion_count = inv_total(bank,$mixing_potion);
+if($banked_potion_count > 5){
+    ~bot_bank_withdraw(0_46_52_1_39,$mixing_potion,28);
+
+    while(inv_total(inv,$mixing_potion) > 4 & p_finduid(uid) = true){
+        def_int $row = 0;
+        def_int $slot = calc($row * 4);
+        
+
+        while($row < 7 & inv_total(inv,$mixing_potion) > 3 & p_finduid(uid) = true){
+            $slot = calc($row * 4);
+
+            def_obj $origin_potion = inv_getobj(inv, $slot);
+            def_obj $destination_potion = inv_getobj(inv, calc($slot + 1));
+            ~decant_potion($destination_potion, $origin_potion,calc($slot + 1),$slot);
+            world_delay(1);
+
+            $origin_potion = inv_getobj(inv, $slot);
+            $destination_potion = inv_getobj(inv, calc($slot + 2));
+            ~decant_potion($destination_potion, $origin_potion,calc($slot + 2),$slot);
+            world_delay(1);
+
+            $origin_potion = inv_getobj(inv, $slot);
+            $destination_potion = inv_getobj(inv, calc($slot + 3));
+            ~decant_potion($destination_potion, $origin_potion,calc($slot + 3),$slot);
+            world_delay(1);
+
+            $row = calc($row + 1);
+        }
+
+        ~bot_bank_deposit_all(0_46_52_1_39,0);
+        if(inv_total(bank,$mixing_potion) > 4){
+            ~bot_bank_withdraw(0_46_52_1_39,$mixing_potion,28);
+        }
+    }
+}
+
+
+
+[proc,combine_all_potions2]
+~botwalk(0_46_52_1_41);
+~botwalk(0_46_52_1_40);
+~bot_bank_deposit_all(0_46_52_1_39,0);
+
+~combine_potions2(1dose1attack,2dose1attack,3dose1attack,4dose1attack);
+~combine_potions2(1doseantipoison,2doseantipoison,3doseantipoison,4doseantipoison);
+~combine_potions2(1dose1strength,2dose1strength,3dose1strength,strength4);
+~combine_potions2(1dosestatrestore,2dosestatrestore,3dosestatrestore,4dosestatrestore);
+~combine_potions2(1dose1defense,2dose1defense,3dose1defense,4dose1defense);
+~combine_potions2(1doseprayerrestore,2doseprayerrestore,3doseprayerrestore,4doseprayerrestore);
+~combine_potions2(1dose2attack,2dose2attack,3dose2attack,4dose2attack);
+~combine_potions2(1dosefisherspotion,2dosefisherspotion,3dosefisherspotion,4dosefisherspotion);
+~combine_potions2(1dose2strength,2dose2strength,3dose2strength,4dose2strength);
+~combine_potions2(1dose2defense,2dose2defense,3dose2defense,4dose2defense);
+~combine_potions2(1dose1antidragon,2dose1antidragon,3dose1antidragon,4dose1antidragon);
+~combine_potions2(1doserangerspotion,2doserangerspotion,3doserangerspotion,4doserangerspotion);
+~combine_potions2(1dosepotionofzamorak,2dosepotionofzamorak,3dosepotionofzamorak,4dosepotionofzamorak);
+    
+
+
+[proc,combine_potions2](obj $1dose, obj $2dose, obj $3dose, obj $4dose)
+if(inv_total(bank,$1dose) > 0){
+    ~bot_bank_withdraw2(0_46_52_1_39,$1dose,^max_32bit_int);
+}
+if(inv_total(bank,$2dose) > 0){
+    ~bot_bank_withdraw2(0_46_52_1_39,$2dose,^max_32bit_int);
+}
+if(inv_total(bank,$3dose) > 0){
+    ~bot_bank_withdraw2(0_46_52_1_39,$3dose,^max_32bit_int);
+}
+
+
+def_int $slot = calc(27 - inv_freespace(inv));
+def_int $end = 0;
+
+while($slot > $end & p_finduid(uid) = true){
+    def_obj $origin_potion = inv_getobj(inv, $slot);
+    def_obj $destination_potion = inv_getobj(inv, $end);
+    ~decant_potion($destination_potion, $origin_potion,$end,$slot);
+
+    if(inv_getobj(inv, $end) = $4dose){
+        $end = calc($end + 1);
+    }
+    if(inv_getobj(inv, $slot) = vial_empty){
+        $slot = calc($slot - 1);
+    }
+    world_delay(1);
+}
+~bot_bank_deposit_all(0_46_52_1_39,0);
+
+
+
+
+
+[proc,decant_potion](obj $potion, obj $used_potion, int $origin_slot, int $destination_slot)
+def_enum $potion_enum = ~get_potion_type($potion, $used_potion);
+if ($potion_enum = null) {
+    ~displaymessage(^dm_default);
+    return;
+}
+def_int $doses = oc_param($potion, dose_count);
+def_int $used_doses = oc_param($used_potion, dose_count);
+if($doses = 4 | $used_doses = 4) {
+    ~displaymessage(^dm_default); // we can't decant with a 4 dose pot
+    return;
+}
+def_int $total_doses = calc($doses + $used_doses);
+def_int $remainder_doses = 0;
+if($total_doses > 4) {
+    $remainder_doses = calc($total_doses - 4);
+    $total_doses = 4;
+}
+def_namedobj $decanted_potion = enum(int, namedobj, $potion_enum, $total_doses);
+def_namedobj $remainder_potion = vial_empty;
+if($remainder_doses > 0) {
+    $remainder_potion = enum(int, namedobj, $potion_enum, $remainder_doses);
+}
+inv_setslot(inv, $origin_slot, $decanted_potion, 1);
+inv_setslot(inv, $destination_slot, $remainder_potion, 1);
+
+sound_synth(liquid, 0, 0); // osrs
+// https://youtu.be/qGcENRGIcoI?si=qGubXr8z_G3aDeaI&t=12
+mes("You have combined the liquid into <tostring($total_doses)> doses.");
+

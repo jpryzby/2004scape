@@ -4,27 +4,27 @@ mes("Smelting");
 
 
 def_obj $ore = gold_ore;
-while(p_finduid(uid) = true){
-    if(p_finduid(uid) = true){
+while(p_finduid(uid) = true & inv_total(bank,$ore) > 1){
+ 
+
         ~botrun(0,999,true);
         ~botwalk(0_46_52_30_42);
         facesquare(0_46_52_31_40);
 
-        def_int $count = 1;
-        while($count < 29){
+        while(inv_total(inv,$ore) > 0 & p_finduid(uid) = true){
             ~bot_smithing_furnace($ore);
-            $count = calc($count + 1);
+            world_delay(1);
         }
         
         ~botwalk(0_46_52_1_40);
+        ~bot_bank_deposit_all(0_46_52_1_39, 0);
 
-
-
-        ~bot_bank_deposit(0_46_52_1_39, 1);
-        //~bot_bank_withdraw(0_46_52_1_39, copper_ore, 14);
-        //~bot_bank_withdraw(0_46_52_1_39, tin_ore, 14);
+        if(~gear_check(ring_of_forging, 12, "Ring of Forging") = false & inv_total(bank,ring_of_forging) > 1){
+            ~bot_bank_withdraw(0_46_52_1_39, ring_of_forging, 1);
+            inv_setslot(worn, ^wearpos_ring, ring_of_forging, 1);
+            inv_del(inv, ring_of_forging, 1);
+        }
         ~bot_bank_withdraw(0_46_52_1_39, $ore, 28);
-    }
 }
 
 
@@ -43,9 +43,6 @@ switch_obj ($ore)
     //case silver_bar : @craft_silver;
     //case steel_bar : @smelt_cannonballs;
     //case bucket_sand, soda_ash : @smelt_glass;
-    //case caveorb1, caveorb2, caveorb3, caveorb4 :
-    //    if(loc_type = furnace_upass) @destroy_orboflight($ore);
-    //    ~displaymessage(^dm_default);
     case default :
         if (oc_category($ore) = category_91) {
             ~bot_smelt_ore($ore);
@@ -132,51 +129,4 @@ inv_add(inv, $bar, 1);
 mes(struct_param($struct, productmessage));
 world_delay(1);
 if_close;
-//----------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[proc,mine_bronze]
-while(p_finduid(uid) = true){
-    ~botwalk(0_51_52_23_38);
-
-
-    while(inv_freespace(inv) > 0){
-        ~bot_mine(0_51_52_23_37, 0_51_52_23_38, copperrock1);
-        ~bot_mine(0_51_52_24_38, 0_51_52_23_38, tinrock1);
-    }
-
-
-
-    ~botwalk(0_50_53_54_28);
-
-    ~bot_bank_deposit(0_50_53_54_27, 27);
-    ~bot_bank_deposit(0_50_53_54_27, 26);
-
-}
-
 

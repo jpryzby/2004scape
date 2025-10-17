@@ -7,17 +7,17 @@ while(p_finduid(uid) = true){
     ~mine_iron_rocks;
 
     ~return_from_iron_mine;
-    ~bot_bank_deposit_all(0_47_52_5_26,2);
+    ~bot_bank_deposit_all(0_47_52_5_26,0);
 }
 
 
 
 [proc,walk_to_iron_mine]
 ~botrun(0,999,true);
-    ~botwalk(0_47_52_56_52);
-    ~bot_oploc(0_47_52_55_52,loc_1512,1);
-    ~botwalk(0_47_52_54_49);
-    ~bot_oploc(0_47_52_51_48,loc_1733,1);
+~botwalk(0_47_52_56_52);
+~bot_oploc(0_47_52_55_52,loc_1512,1);
+~botwalk(0_47_52_54_49);
+~bot_oploc(0_47_52_51_48,loc_1733,1);
 
 
 

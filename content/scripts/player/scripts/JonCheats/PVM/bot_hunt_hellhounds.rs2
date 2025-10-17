@@ -1,0 +1,88 @@
+
+[debugproc,hunt_hellhounds]
+mes("Hunting Hellhounds");
+
+~walk_to_hellhounds;
+
+while(p_finduid(uid) = true & stat(hitpoints) > 25){
+    ~walk_to_safe_spot(0_42_151_43_18);
+    def_coord $loot_coord = ~fight_with_safespot(0_42_151_43_18, hellhound, 6);
+    ~loot_hellhound($loot_coord);
+    world_delay(1);
+}
+
+
+
+[proc,walk_to_hellhounds]
+~botwalk(0_42_151_43_18);
+
+
+[proc,fight_hellhound]()(coord)
+~botwalk(0_42_151_43_18);
+
+///if under attack
+if(%aggressive_npc ! null & add(%lastcombat, 8) > map_clock){
+    if(npc_finduid(%aggressive_npc) = true){
+        mes("found");
+        if(p_finduid(uid) = true){
+            p_opnpc(2);
+        }
+
+        // While in combat
+        while(p_finduid(uid) = true & npc_stat(hitpoints) > 0){
+            if(coord ! 0_42_151_43_18){
+                ~walk_to_safe_spot(0_42_151_43_18);
+            }
+            p_opnpc(2);
+            world_delay(1);
+        }
+        if_close;
+
+        return(npc_coord);
+    }else{
+        mes("not found");
+        world_delay(1);
+    }
+    
+}else{
+    if(npc_find(0_42_151_47_20, hellhound, 5, 0) = true){
+        if(p_finduid(uid) = true){
+            p_opnpc(2);
+        }
+
+        // While in combat
+        while(p_finduid(uid) = true & npc_stat(hitpoints) > 0){
+            if(coord ! 0_42_151_43_18){
+                ~walk_to_safe_spot(0_42_151_43_18);
+            }
+            p_opnpc(2);
+            world_delay(1);
+        }
+        if_close;
+
+        return(npc_coord);
+    }else{
+        mes("Waiting for Enemy respawns");
+        world_delay(5);
+    }
+}
+
+
+[proc,loot_hellhound](coord $enemy_Coord)
+world_delay(2);
+~botwalk($enemy_Coord);
+obj_findallzone($enemy_Coord);
+while(p_finduid(uid) = true & obj_findnext() = true & inv_freespace(inv) > 0){
+    ~botwalk($enemy_Coord);
+    switch_obj(active_obj) {
+        case bones : ~bury(bones);
+
+        case bronze_arrow : ~pick_up(0);
+        case iron_arrow : ~pick_up(0);
+        case iron_knife : ~pick_up(0);
+
+        case default : ~pick_up(1);
+    }
+    obj_findallzone($enemy_Coord); 
+}
+equip_arrows;

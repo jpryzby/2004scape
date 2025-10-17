@@ -1,0 +1,36 @@
+
+
+
+[debugproc,steal_ardy_knight]
+mes("Pickpocketing Ardy Knights");
+def_obj $food = salmon;
+
+~botwalk(0_41_51_30_19);
+~botwalk(0_41_51_31_19);
+~bot_bank_deposit_all(0_41_51_32_19,0);
+~bot_bank_withdraw(0_41_51_32_19,coins,50);
+~bot_bank_withdraw(0_41_51_32_19,$food,27);
+~botwalk(0_41_51_30_43);
+
+while(p_finduid(uid) = true){
+    ~botrun(80,800,true);
+    if(npc_find(coord, knight_of_ardougne, 15, ^vis_off) = true & p_finduid(uid) = true){
+        mes("Found NPC");
+        p_opnpc(3);
+        world_delay(1);
+
+
+        if(stat(hitpoints) < 50){
+            if(inv_total(inv,$food) = 0){
+                def_coord $return_coord = coord;
+                ~botwalk(0_41_51_31_19);
+                ~bot_bank_withdraw(0_41_51_32_19,$food,27);
+                ~botwalk($return_coord); 
+            }
+            while(stat(hitpoints) < 70 & inv_total(inv,$food) > 0 & p_finduid(uid) = true){
+                ~bot_eat($food);
+            }
+        }
+    }
+    world_delay(2);
+}

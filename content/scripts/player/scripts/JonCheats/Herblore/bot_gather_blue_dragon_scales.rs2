@@ -1,0 +1,98 @@
+[debugproc,gather_dragon_scale]
+mes("Gathering Blue Dragon Scale Dust");
+
+~gear_check_for_dragon_scales;
+while(p_finduid(uid) = true & inv_total(inv,airrune) > 2 & inv_total(inv,lawrune) > 0 & inv_total(inv,waterrune) > 0){
+    ~walk_to_dragon_scales;
+    ~loot_all_dragon_scales;
+    ~walk_from_dragon_scales;
+    ~grind_dragon_scales;
+    ~bot_bank_deposit_all(0_46_52_1_39,5);
+    ~bot_heal(0_46_52_1_39);
+}
+
+
+
+
+
+[proc,gear_check_for_dragon_scales]
+~botwalk(0_46_52_1_41);
+~botwalk(0_46_52_1_40);
+~bot_bank_deposit_all(0_46_52_1_39,0);
+~bot_bank_withdraw(0_46_52_1_39,airrune,^max_32bit_int);
+~bot_bank_withdraw(0_46_52_1_39,waterrune,^max_32bit_int);
+~bot_bank_withdraw(0_46_52_1_39,lawrune,^max_32bit_int);
+~bot_bank_withdraw(0_46_52_1_39,dusty_key,1);
+~bot_bank_withdraw(0_46_52_1_39,pestle_and_mortar,1);
+if_close;
+
+
+
+[proc,walk_to_dragon_scales]
+~botwalk(0_46_53_21_1);
+~botwalk(0_46_53_9_30);
+~botwalk(0_45_53_56_58);
+~bot_oploc(0_45_53_55_58,loc_1597,1);   //members gate
+~bot_oploc(0_45_53_55_58,loc_1558,1);   //members gate
+~botwalk(0_45_53_35_31);
+~botwalk(0_45_53_5_5);
+~bot_oploc(0_45_53_4_5,loc_1759,1);   //tavlry dungeon ladder
+~botwalk(0_45_153_8_38);
+~bot_oploc(0_45_153_9_38,loc_2144,1);   //dark knight door
+~bot_oploc(0_45_153_9_38,loc_2144,1);   //dark knight door
+~bot_oploc(0_45_153_9_38,loc_2144,1);   //dark knight door
+~botwalk(0_45_153_12_34);
+~bot_oploc(0_45_153_12_34,loc_1542,1);
+~botwalk(0_45_153_37_27);
+~botwalk(0_46_152_7_63);
+~botwalk(0_45_152_58_49);
+~botwalk(0_45_152_47_28);
+~botwalk(0_45_153_44_11);
+//~bot_oploc(loc_2623);   //key door
+//~unlock_taverley_jaildoor;
+if(p_finduid(uid) = true){
+    p_teleport(0_45_153_43_11);
+}
+~botwalk(0_45_153_26_4);
+
+
+
+[proc,loot_all_dragon_scales]
+while(p_finduid(uid) = true & inv_freespace(inv) > 0){
+    ~loot_dragon_scale(0_45_153_22_14);
+    ~loot_dragon_scale(0_45_153_25_9);
+    ~loot_dragon_scale(0_45_153_26_4);
+    ~loot_dragon_scale(0_45_153_28_13);
+    ~loot_dragon_scale(0_45_153_30_17);
+    world_delay(1);
+}
+world_delay(1);
+
+
+
+[proc,loot_dragon_scale](coord $dragon_scale_coord)
+obj_findallzone($dragon_scale_coord);
+while(p_finduid(uid) = true & obj_findnext() = true & inv_freespace(inv) > 0){
+    switch_obj(active_obj) {
+        case blue_dragon_scale : ~pick_up(1);
+        case default : ~destroy;
+    }
+    obj_findallzone($dragon_scale_coord); 
+}
+
+
+
+[proc,walk_from_dragon_scales]
+~magic_teleport(^falador_teleport);
+world_delay(3);
+~botwalk(0_46_52_1_40);
+
+
+
+[proc,grind_dragon_scales]
+def_int $slot = 5;
+while(p_finduid(uid) = true & inv_total(inv,blue_dragon_scale) > 0){
+    ~attempt_grind_ingredient(4, $slot);
+    world_delay(1);
+    $slot = calc($slot + 1);
+}

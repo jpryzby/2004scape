@@ -1,0 +1,67 @@
+[debugproc,gather_spider_egg]
+mes("Gathering Red Spider Eggs");
+
+def_coord $egg_group_1 = 0_48_155_50_37;
+def_coord $egg_group_2 = 0_48_155_56_33;
+def_coord $egg_group_3 = 0_48_155_46_30;
+while(p_finduid(uid) = true){
+    ~walk_to_red_spiders;
+    while(inv_freespace(inv) > 0 & p_finduid(uid) = true){
+
+        obj_findallzone($egg_group_1);
+        if(p_finduid(uid) = true & inv_freespace(inv) > 0 & obj_findnext() = true){
+            mes("egg_group_1");
+            ~gather_red_spider_eggs;
+        }else{
+            obj_findallzone($egg_group_2);
+            if(p_finduid(uid) = true & inv_freespace(inv) > 0 & obj_findnext() = true){
+                mes("egg_group_2");
+                ~gather_red_spider_eggs;
+            }else{
+                obj_findallzone($egg_group_3);
+                if(p_finduid(uid) = true & inv_freespace(inv) > 0 & obj_findnext() = true){
+                    mes("egg_group_3");
+                    ~gather_red_spider_eggs;
+                }else{
+                    mes("fight");
+                    ~fight(deadly_red_spider,20,0_48_155_56_35);
+                }
+            }
+        }
+        world_delay(1);
+    }
+
+
+    ~walk_to_edge_bank;
+    ~bot_bank_deposit_all(0_48_54_23_35,0);
+    ~bot_heal(0_48_54_23_35);
+}
+
+
+
+
+
+
+[proc,gather_red_spider_eggs]
+switch_obj(active_obj) {
+    case red_spiders_eggs : ~pick_up(0);
+    case default : ~destroy;
+}
+
+
+
+
+[proc,walk_to_red_spiders]
+~botrun(0,100,true);
+~botwalk(0_48_54_24_12);
+
+~bot_oploc(0_48_54_25_12,loc_1568,1);
+~bot_oploc(0_48_54_25_12,loc_1570,1);
+
+~botwalk(0_48_154_31_53);
+~bot_oploc(0_48_154_31_54,loc_1557,1);
+
+~botwalk(0_48_154_59_61);
+if_close;
+~bot_oploc(0_48_154_59_61,loc_1596,1);
+~botwalk(0_48_155_56_35);

@@ -1,8 +1,10 @@
 [proc,botwalk](coord $target)
 def_int $timestamp = map_clock;
 def_int $counter = 0;
-if(p_finduid(uid) = true){
+if(p_finduid(uid) = true & $target ! null){
+    p_clearpendingaction;
     p_walk($target);
+    p_clearpendingaction;
     while(coord ! $target & p_finduid(uid) = true){
         if(add($timestamp, 20) < map_clock){
             mes("Walking to <~coord_tostring($target)>");
@@ -24,7 +26,7 @@ if(p_finduid(uid) = true){
 
 [proc,bot_oploc](coord $location, loc $locname, int $op_number)
 if(loc_find($location,$locname) = true & p_finduid(uid) = true){
-    facesquare($location);
+    //facesquare($location);///////jp is this neccessary? or does oploc auto do it?
     p_oploc($op_number);
     world_delay(1);
 }else{
@@ -51,17 +53,28 @@ if(p_finduid(uid) = true){
 
 [proc,bot_bank_withdraw](coord $bankboothCoord, obj $item, int $requestedAmount)
 def_int $count = inv_total(bank, $item);
-if($count = 1){
+if($count < 2){
     return;
 }
-if($count < $requestedAmount){
+if(calc($count - 1) < $requestedAmount){
     $requestedAmount = calc($count - 1);
 }
-
 ~bot_oploc($bankboothCoord, bankbooth, 2);
 ~bank_withdraw_request(inv, $item, $requestedAmount, 0);
-world_delay(1);
 if_close;
+
+
+
+[proc,bot_bank_withdraw2](coord $bankboothCoord, obj $item, int $requestedAmount)
+def_int $count = inv_total(bank, $item);
+
+if(calc($count) < $requestedAmount){
+    $requestedAmount = $count;
+}
+~bot_oploc($bankboothCoord, bankbooth, 2);
+~bank_withdraw_request(inv, $item, $requestedAmount, 0);
+if_close;
+
 
 
 //inventory slot range is 1-28
@@ -90,10 +103,10 @@ if_close;
 ~bot_oploc($bankboothCoord, bankbooth, 2);
 
 def_int $slot = $starting_at;
-while($slot < 28){
+while($slot < 28 & p_finduid(uid) = true){
     def_obj $item = inv_getobj(inv,$slot);
     if($item ! null){
-        ~bank_deposit_request(inv, $item, 999, $slot);
+        ~bank_deposit_request(inv, $item, ^max_32bit_int, $slot);
         world_delay(1);
     }
     $slot = calc($slot + 1);
@@ -104,7 +117,7 @@ if_close;
 
 
 
-[proc,bury]
+[proc,bury](obj $bone)
 
 obj_takeitem(inv);
 mes("You dig a hole in the ground...");
@@ -115,11 +128,8 @@ if(p_finduid(uid) = true){
     p_delay(0);
 }
 
-def_int $invSlot = calc(27 - inv_freespace(inv));
-def_obj $last_item = inv_getobj(inv, $invSlot);
-inv_delslot(inv, $invSlot);
-
-stat_advance(prayer, oc_param($last_item, bone_exp));
+inv_del(inv, $bone, 1);
+stat_advance(prayer, oc_param($bone, bone_exp));
 mes("You bury the bones.");
 world_delay(1);
 if_close;
@@ -131,26 +141,31 @@ obj_del;
 
 
 [proc,pick_up](int $delay)
-mes("picking up <obj_name>");
-obj_takeitem(inv);
-world_delay($delay);
+if(inv_freespace(inv) > 0){
+    mes("picking up <obj_name>");
+    obj_takeitem(inv);
+    world_delay($delay);
+}
 
-
-
+[proc,p]()(boolean)
+if(p_finduid(uid) = true){
+    return(true);
+}
+return(false);
 
 
 [debugproc,alch]
 //def_obj $item = cert_maple_longbow;
-def_obj $item = cert_yew_longbow;
+//def_obj $item = cert_yew_longbow;
+def_obj $item = cert_magic_longbow;
+
 def_dbrow $spell_data = ~get_spell_data(^highlvl_alchemy);
 def_coord $startingSquare = coord;
 
-while(inv_total(inv, $item) > 0 & ~check_spell_requirements($spell_data) = true & $startingSquare = coord){
-    if(p_finduid(uid) = true){
-        ~magic_spell_high_alch(^highlvl_alchemy, $item);   
-        world_delay(1);
-        if_close;
-    }
+while(inv_total(inv, $item) > 0 & ~check_spell_requirements($spell_data) = true & $startingSquare = coord & p_finduid(uid) = true){
+    ~magic_spell_high_alch(^highlvl_alchemy, $item);   
+    world_delay(1);
+    if_close;
 }
 
 
@@ -193,7 +208,7 @@ p_delay(3);
 [debugproc,heat]
 def_coord $starting_location = coord;
 
-while($starting_location = coord){
+while($starting_location = coord & p_finduid(uid) = true){
     ~heat;
     ~bot_bank_deposit_all(0_49_53_50_44,2);
     ~bot_bank_withdraw(0_49_53_50_44, iron_ore, 27);
@@ -206,7 +221,7 @@ def_obj $item = iron_ore;
 def_dbrow $spell_data = ~get_spell_data(^superheat_item);
 def_coord $startingSquare = coord;
 
-while(inv_total(inv, $item) > 0 & ~check_spell_requirements($spell_data) = true & $startingSquare = coord){
+while(inv_total(inv, $item) > 0 & ~check_spell_requirements($spell_data) = true & $startingSquare = coord & p_finduid(uid) = true){
     if(p_finduid(uid) = true){
         ~magic_spell_superheat(^superheat_item, $item);  
         world_delay(1);
@@ -288,13 +303,33 @@ if (afk_event = ^true) {
 split_init($string, 380, 4, q8);
 def_int $page = 0;
 def_int $pagetotal = split_pagecount;
-while ($page < $pagetotal) {
+while ($page < $pagetotal & p_finduid(uid) = true) {
     ~chatnpc_page(npc_name, npc_type, $page);
     facesquare(npc_coord);
     if(npc_getmode ! opplayer2 & npc_getmode ! applayer2) npc_setmode(playerfaceclose);
     world_delay(2);
     $page = calc($page + 1);
 }
+
+
+
+
+
+
+[proc,bot_multi2](string $string1, proc $label1, string $string2, proc $label2, int $bot_choice)
+def_int $choice = ~bot_p_choice2($string1, 1, $string2, 2, $bot_choice);
+if ($choice = 1) gosub($label1);
+gosub($label2);
+
+
+[proc,bot_multi3](string $string1, proc $label1, string $string2, proc $label2, string $string3, proc $label3, int $bot_choice)
+def_int $choice = ~bot_p_choice3($string1, 1, $string2, 2, $string3, 3, $bot_choice);
+if ($choice = 1) gosub($label1);
+if ($choice = 2) gosub($label2);
+gosub($label3);
+
+
+
 
 
 
@@ -313,7 +348,6 @@ switch_int ($choice) {
     case 1 : return($ret1);
     case default : return($ret2);
 }
-
 
 
 
@@ -342,7 +376,7 @@ switch_int ($choice) {
 split_init($string, 380, 4, q8);
 def_int $page = 0;
 def_int $pagetotal = split_pagecount;
-while ($page < $pagetotal) {
+while ($page < $pagetotal & p_finduid(uid) = true) {
     ~chatplayer_page($page);
     world_delay(2);
     $page = calc($page + 1);
@@ -355,7 +389,7 @@ while ($page < $pagetotal) {
 split_init($string, 470, 5, q8);
 def_int $page = 0;
 def_int $pagetotal = split_pagecount;
-while ($page < $pagetotal) {
+while ($page < $pagetotal & p_finduid(uid) = true) {
     ~mesbox_page($page);
     world_delay(2);
     $page = calc($page + 1);
@@ -434,7 +468,225 @@ def_int $food_withdraw_quantity = calc($amount_to_heal / $heal_amount);
 ~bot_bank_withdraw($bank_coord,$food,$food_withdraw_quantity);
 if_close;
 
-while(inv_total(inv,$food) > 0){
-    ~eat_trout($food);
-    world_delay(3);
+while(inv_total(inv,$food) > 0 & p_finduid(uid) = true){
+    ~bot_eat($food);
 }
+
+
+
+
+[proc,fight](npc $npc, int $range, coord $center)(coord)
+def_coord $npcCoord = coord;
+
+///if under attack
+if(%aggressive_npc ! null & add(%lastcombat, 8) > map_clock){
+    if(npc_finduid(%aggressive_npc) = true){
+        mes("found");
+        if(p_finduid(uid) = true){
+            p_opnpc(2);
+        }
+
+        // While in combat
+        while(p_finduid(uid) = true & npc_stat(hitpoints) > 0){
+            p_opnpc(2);
+            world_delay(1);
+        }
+        if_close;
+
+        return(npc_coord);
+    }else{
+        mes("not found");
+        world_delay(1);
+    }
+    
+}else{
+    if(npc_find(coord, $npc, $range, 0) = true){
+        if(p_finduid(uid) = true){
+            p_opnpc(2);
+        }
+        // While in combat
+        while(p_finduid(uid) = true & npc_stat(hitpoints) > 0){
+            mes("in combat");
+            p_opnpc(2);
+            world_delay(1);
+        }
+        if_close;
+
+        return(npc_coord);
+    }else{
+        mes("Waiting for Enemy respawns");
+        ~botwalk($center);
+        world_delay(1);
+    }
+}
+
+
+
+
+[proc,magic_teleport](int $spell)
+if_close;
+if (p_finduid(uid) = true) {
+    // look for spell in db
+    def_dbrow $spell_data = ~get_spell_data($spell);
+    if (~check_spell_requirements($spell_data)= false) {
+        return;
+    }
+    if (~wilderness_level(coord) > 20) {
+        mes("A mysterious force blocks your teleport spell!");
+        mes("You can't use this teleport after level 20 wilderness.");
+        return;
+    }
+    if($spell = ^ardougne_teleport & %elena_progress < ^elena_complete) {
+        mes("You must have completed Plague City to use this spell.");
+        return;
+    }
+    if($spell = ^watchtower_teleport & %itwatchtower_progress < ^itwatchtower_complete) {
+        mes("You must have completed Watch Tower to use this spell.");
+        return;
+    }
+    // https://www.reddit.com/r/2007scape/comments/b4vdki/watchtower_teleport_not_working_despite/, https://runescape.salmoneus.net/forums/topic/212538-cant-do-ardougne-tele-why-is-it-so/
+    if(($spell = ^ardougne_teleport & %elena_progress < ^elena_complete_read_scroll) | ($spell = ^watchtower_teleport & %itwatchtower_progress < ^itwatchtower_complete_read_scroll)) {
+        mes("You havn't learnt how to cast this spell yet.");
+        return;
+    }
+    if (~pre_tele_checks(coord) = false) {
+        return;
+    }
+    if (afk_event = ^true) {
+        ~macro_event_general_spawn(~macro_event_set_random);
+        return;
+    }
+    // delete runes and give xp
+    ~delete_spell_runes($spell_data);
+    ~give_spell_xp($spell_data);
+    // give additional affects
+    // teleport player. Always a radius of 2
+    ~player_teleport_normal(map_findsquare(db_getfield($spell_data, magic_spell_table:tele_coord, 0), 0, 2, ^map_findsquare_lineofwalk));
+}
+
+
+[debugproc,tele]
+if(p_finduid(uid) = true){
+    p_telejump(0_46_52_1_40);
+}
+
+
+
+[proc,bot_cure_poison](int $slot)
+if(%poison > 0){
+    if(inv_total(bank,1doseantipoison) > 0){
+        ~bot_bank_withdraw2(0_46_52_1_39,1doseantipoison,1);
+    }else if(inv_total(bank,2doseantipoison) > 0){
+        ~bot_bank_withdraw2(0_46_52_1_39,2doseantipoison,1);
+    }else if(inv_total(bank,3doseantipoison) > 0){
+        ~bot_bank_withdraw2(0_46_52_1_39,3doseantipoison,1);
+    }else if(inv_total(bank,4doseantipoison) > 1){
+        ~bot_bank_withdraw(0_46_52_1_39,4doseantipoison,1);
+    }else{
+        mes("out of antipoison");
+        while(p_finduid(uid) = true){
+            world_delay(100);
+        }
+    }
+    ~player_consume_antipoison(null, null, $slot);
+}
+world_delay(1);
+
+
+
+[proc,set_autocast_spell](int $spell)
+if_close;
+if (p_finduid(uid) = true) {
+    def_dbrow $spell_data = ~get_spell_data($spell);
+    if (~check_spell_requirements($spell_data) = false) {
+        return;
+    }
+    // set auto cast varp
+    %autocast_spell = $spell;
+
+    %attackstyle_magic = 2;
+    if_settext(combat_staff_2:auto_spell, db_getfield($spell_data, magic_spell_table:name, 0));
+
+    ~initalltabs;
+}
+
+
+
+
+[proc,dig]
+if(p_finduid(uid) = true){
+    if (distance(coord, 0_46_52_55_55) <= 1) {
+        //@hunt_dig;
+    }
+
+    // zombiequeen (todo: did this always exist? It almost certainly existed in 2007, checking https://youtu.be/w1I0GXAkLKw?si=avVq7fsXaho-wZvK&t=317, it does
+    // facesquare(loc_coord), which wouldnt be needed if it was only triggerable from oplocu
+    if(inzone(0_45_46_40_54, 0_45_46_43_55, coord) = true) {
+        if(loc_find(0_45_46_41_55, loc_2217) = true) {
+            //@zombiequeen_mound_dig;
+        }
+    }
+
+    // Everything else
+    p_arrivedelay;
+    p_stopaction;
+    anim(human_dig, 0);
+
+    // itexam - digsite area, workmen get angry if you dig around the whole mapsquare
+    if (inzone(0_52_53_0_0, 0_52_53_63_63, coord) = true) {
+        //@digworkman1_intervene;
+    }
+
+    // Treasure Trails
+    if(map_members = ^true & ~trail_hasclue_inv = true) {
+        def_obj $clue = ~trail_getclue_inv;
+
+        if(~trail_clue_coord($clue) = true & oc_param($clue, trail_casket) ! null) {
+            def_boolean $sextant_clue = oc_param($clue, trail_sextant);
+            def_coord $trail_coord = oc_param($clue, trail_coord);
+            // for coord clues, https://www.youtube.com/watch?v=rcNbwik5-Ig looking at wiki and this 2013 video you can be 1 tile off and it will still work
+            // todo: try and confirm this behaviour for 2004, this pre dec-2006 video also has this behaviour https://www.youtube.com/watch?v=yH6YaavzuMc
+            // also https://www.youtube.com/watch?v=QhdRJd-g438 for maps
+            if($sextant_clue = true & (inv_total(inv, trail_watch) = 0 | inv_total(inv, trail_chart) = 0 | inv_total(inv, trail_sextant) = 0)) {
+                ~displaymessage(^dm_default);
+                return;
+            }
+            if(distance(coord, $trail_coord) <= 1) {
+                if(oc_param($clue, trail_guardian) ! null) {
+                    def_npc $guard = oc_param($clue, trail_guardian);
+                    if($guard = trail_hard & testbit(%trail_clue, 4) = ^false) {
+                        npc_huntall(coord, 10, 0); // zamorak/saradomin wizards range
+                        while (npc_huntnext = true) {
+                            if(npc_type = trail_hard & %npc_aggressive_player = uid) {
+                                return;
+                            }
+                        }
+                        // los not low: https://www.youtube.com/watch?v=AoozFVuxWx8&t=88s, https://youtu.be/K8IepVULXYM?si=-phA8d-3sJ1ohS9H&t=26
+                        // https://youtu.be/uAv5a6y-3OQ?si=QxAUtMVq6KCZebat&t=36 notice smokepuff on adj tile to where he appears, confirms it should be map_findsquare
+                        npc_add(map_findsquare(coord, 1, 1, ^map_findsquare_lineofsight), trail_hard, 500);
+                        spotanim_map(smokepuff_large, npc_coord, 124, 0);
+                        npc_say("Die, human!");
+                        %aggressive_npc = npc_uid;
+                        // this prevents other players from attacking w/manual cast, this might've been a later change
+                        %npc_lastcombat = sub(^max_32bit_int, 8);
+                        %npc_aggressive_player = uid;
+                        npc_setmode(applayer2);
+                        return;
+                    }
+                }
+                inv_del(inv, $clue, 1);
+                def_namedobj $casket = oc_param($clue, trail_casket);
+                inv_add(inv, $casket, 1);
+                ~trail_casket_obtained($casket);
+                return;
+            }
+        }
+    }
+    ~displaymessage(^dm_default);
+
+}
+
+
+
+[proc,_trail_casket_easy] 
+~progress_clue_easy(last_item, "You've found another clue scroll!");

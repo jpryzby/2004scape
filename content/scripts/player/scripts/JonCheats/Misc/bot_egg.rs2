@@ -1,0 +1,722 @@
+[debugproc,egg]
+mes("Eggy Test");
+
+//~buy_varrok;
+//~hellhound;
+//~clue_scroll_easy;
+//~make_ring_of_forging;
+~smelt_gold_to_amulet;
+
+
+
+
+
+
+
+
+
+
+
+//while(p_finduid(uid) = true){
+//    ~hunt_salarin2;
+//    world_delay(1);
+//}
+
+
+
+
+
+
+[proc,smelt_gold_to_amulet]
+mes("smelting Gold into Amulets");
+
+~botwalk(0_46_52_1_41);
+~botwalk(0_46_52_1_40);
+
+~bot_bank_deposit_all(0_46_52_1_39,0);
+~bot_bank_withdraw(0_46_52_1_39,amulet_mould,1);
+
+while(p_finduid(uid) = true & inv_total(bank,gold_ore) > 1){
+    ~bot_bank_withdraw(0_46_52_1_39,gold_ore,27);
+    
+    ~botwalk(0_46_52_30_42);
+    facesquare(0_46_52_31_40);
+    while(inv_total(inv,gold_ore) > 0 & p_finduid(uid) = true){
+        ~bot_smithing_furnace(gold_ore);
+        ~craft_jewelery(1);
+    }
+    
+
+    ~botwalk(0_46_52_1_40);
+    ~bot_bank_deposit_all(0_46_52_1_39,1);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[proc,firemaking]
+def_obj $log = willow_logs;
+
+while(p_finduid(uid) = true){
+    ~bot_firemaking($log,0_51_53_2_38);
+    ~bot_firemaking($log,0_51_53_2_37);
+    ~bot_firemaking($log,0_51_53_2_36);
+    world_delay(1);
+}
+
+
+
+
+
+[proc,bot_firemaking](obj $log, coord $coord)
+if(inv_total(inv,$log) > 0){
+    ~botwalk($coord);
+    def_int $count = 1;
+    while($count < 28 & p_finduid(uid) = true){
+        ~light_logs_inv($count);
+        world_delay(1);
+        if_close;
+        $count = calc($count + 1);
+    }
+    ~botwalk(0_50_53_53_28);
+    ~bot_bank_withdraw(0_50_53_53_27,$log,27);
+}
+
+
+
+
+[proc,light_logs_inv](int $slot)
+if(p_finduid(uid) = true & oc_category(inv_getobj(inv, $slot)) = category_22){
+    def_obj $log = inv_getobj(inv, $slot);
+    def_int $level = oc_param($log, levelrequire);
+
+    if (stat(firemaking) < $level) {
+        mes("You need a Firemaking level of <tostring($level)> to burn <oc_name($log)>.");
+        return;
+    }
+    // check if the coord is already occupied by an interactable loc
+    if (~area_allow_loc_add(coord) = false) {
+        mes("You can't light a fire here.");
+        return;
+    }
+    // check if they have tinderbox
+    if(inv_total(inv, tinderbox) < 1) {
+        mes("You need a tinderbox to light a fire.");
+        return;
+    }
+    inv_dropslot(inv, coord, $slot, ^lootdrop_duration);
+    if (%action_delay < map_clock) {
+        p_stopaction;
+        anim(human_createfire, 0);
+        sound_synth(tinderbox_strike, 0, 0);
+        mes("You attempt to light the logs.");
+        %action_delay = calc(map_clock + 3);
+        world_delay(3);
+    } else if (%action_delay = map_clock) {
+        if(stat_random(firemaking, 64, 512) = true) { // firemaking roll
+            %action_delay = calc(map_clock + 4);
+            ~push_player(obj_coord);
+            ~firemaking_success(obj_coord, $log); // if fully blocked then just light the log and dont move
+            return;
+        } else {
+            // if fails, then reattempt to light
+            anim(human_createfire, 0);
+            sound_synth(tinderbox_strike, 0, 0);
+            %action_delay = calc(map_clock + 4);
+            world_delay(4);
+        }
+    }
+    ~light_logs_ground;
+}
+
+
+[proc,light_logs_ground]
+if(p_finduid(uid) = true){
+    def_obj $log = obj_type;
+    // check level first
+    def_int $level = oc_param($log, levelrequire);
+    if (stat(firemaking) < $level) {
+        mes("You need a Firemaking level of <tostring($level)> to burn <oc_name($log)>.");
+        return;
+    }
+    if (~area_allow_loc_add(obj_coord) = false) {
+        mes("You can't light a fire here.");
+        return;
+    }
+    // check if they have tinderbox
+    if(inv_total(inv, tinderbox) < 1) {
+        mes("You need a tinderbox to light a fire.");
+        return;
+    }
+    // 4t cycle
+    // mes(tostring(sub(map_clock, %action_delay)));
+   
+        if(stat_random(firemaking, 64, 512) = true) { // firemaking roll
+            %action_delay = calc(map_clock + 4);
+            // attempt to firemaking each direction: west east south north
+            // if player isnt standing on the log anymore, the fire is lit
+            ~push_player(obj_coord);
+            // if fully blocked then just light the log and dont move
+            ~firemaking_success(obj_coord, $log);
+            world_delay(1);
+            return;
+        } else {
+            // if fails, then reattempt to light
+            anim(human_createfire, 0);
+            sound_synth(tinderbox_strike, 0, 0);
+            %action_delay = calc(map_clock + 4);
+            world_delay(4);
+        }
+    
+    // mes("<tostring(map_clock)>: p_opobj(4)");
+    ~light_logs_ground; // interact with obj again
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[proc,make_ring_of_forging]
+mes("Making Rings of Forging");
+~botwalk(0_46_52_1_41);
+~botwalk(0_46_52_1_40);
+~bot_bank_deposit_all(0_46_52_1_39,0);
+
+~unequip(^wearpos_rhand);
+~bot_bank_deposit_all(0_46_52_1_39,0);
+
+~bot_bank_withdraw(0_46_52_1_39,chisel,1);
+~bot_bank_withdraw(0_46_52_1_39,ring_mould,1);
+~bot_bank_withdraw(0_46_52_1_39,cosmicrune,^max_32bit_int);
+~bot_bank_withdraw(0_46_52_1_39,fire_battlestaff,1);
+
+~try_equip(3);
+
+while(p_finduid(uid) = true & inv_total(bank,gold_bar) > 1 & inv_total(bank,uncut_ruby) > 1){
+    ~bot_bank_withdraw(0_46_52_1_39,gold_bar,12);
+    ~bot_bank_withdraw(0_46_52_1_39,uncut_ruby,12);
+
+    while(inv_total(inv,uncut_ruby) > 0){
+        ~crafting_gem(uncut_ruby);
+    }
+
+    ~botwalk(0_46_52_30_42);
+    facesquare(0_46_52_31_40);
+    ~craft_jewelery(12);
+
+    def_int $count = 3;
+    while($count < 15){
+        ~magic_spell_enchant(^enchant_lvl3, $count);
+        $count = calc($count + 1);
+    }
+
+    ~botwalk(0_46_52_1_40);
+    ~bot_bank_deposit_all(0_46_52_1_39,3);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[proc,craft_jewelery](int $count)
+def_obj $jewelry_obj = unstrung_gold_amulet;
+
+if(p_finduid(uid) = true){
+    // check if mems objs are selected
+    if ($jewelry_obj = invis_amulet5 | $jewelry_obj = invis_necklace5 | $jewelry_obj = invis_ring5) {
+        if (map_members = ^false) {
+            mes(^mes_members_feature);
+            return;
+        }
+    }
+    //mes(oc_debugname($jewelry_obj));
+    def_struct $struct = oc_param($jewelry_obj, crafting_jewelry_struct);
+    def_int $level = 34;
+    if (stat(crafting) < $level) {
+        if_close;
+        ~mesbox("You need at least level <tostring($level)> Crafting to make that.");
+        return;
+    }
+    // macro event
+    if (afk_event = ^true) {
+        ~macro_event_general_spawn(~macro_event_set_random);
+        return;
+    }
+    def_namedobj $gem = ruby;
+    // ****** FOR WEAKQUEUE *******
+    // // make sure the player doesnt produce more than they can
+    // // the gem_total is only 0 when the player selects gold crafting
+    // def_int $gem_total = inv_total(inv,  struct_param($struct, gem));
+    // if ($gem_total = 0) {
+    //     $count = min($count, inv_total(inv, gold_bar));
+    // } else {
+    //     $count = min(min($count, inv_total(inv, gold_bar)), $gem_total);
+    // }
+    // ****** FOR WEAKQUEUE *******
+    def_int $productexp = 300;
+    def_namedobj $product = unstrung_gold_amulet;
+    // mes(oc_debugname($product));
+    if_close;
+    anim(human_furnace, 0);
+    sound_synth(furnace, 0, 0);
+    p_delay(2);
+    ~crafting_gold($product, $gem, $productexp, $count);
+    // weakqueue(crafting_gold, 1, $productexp, $gem, $product, $count);
+    //----------------------
+}
+world_delay(1);
+if_close;
+
+
+
+
+[proc,magic_spell_enchant](int $spell, int $slot)
+if(p_finduid(uid) = true){
+    def_obj $initial_obj = inv_getobj(inv, $slot);
+    // if player has casted a spell recently then return
+    if (inv_total(inv, $initial_obj) < 1) {
+        return;
+    }
+    // look for spell in db
+    def_dbrow $spell_data = ~get_spell_data($spell);
+    if (~check_spell_requirements($spell_data) = false) {
+        return;
+    }
+    def_namedobj $final_obj;
+    def_seq $anim;
+    def_spotanim $spotanim;
+    def_synth $sound;
+    $final_obj, $anim, $spotanim, $sound = ~magic_spell_search_convertobj($spell_data, $initial_obj);
+    // if you cant enchant the item, display this message
+    if ($final_obj = null) {
+        // this checks if initial_obj has a specific message with the current spell
+        ~magic_spell_specificobj_reqmessage($spell_data, $initial_obj); 
+        mes(db_getfield($spell_data, magic_spell_table:additional_reqmessage, 0));
+        return;
+    }
+    // if they use a spell on a valid obj, but its p2p check it here
+    // --
+    // i know this isnt how jagex does it, since ring of forging is f2p in osrs but unenchantable in f2p.
+    // They likely have another label for enchanting rings
+    if (oc_members($final_obj) = true & map_members = ^false) {
+        // not sure what the members message is
+        mes("You can only make that on a members' server.");
+        return;
+    }
+    // enchanting always sets slot instead of deleting
+    inv_setslot(inv, $slot, $final_obj, 1);
+    ~delete_spell_runes($spell_data);
+    ~give_spell_xp($spell_data);
+
+    anim($anim, 0);
+    spotanim_pl($spotanim, 92, 0);
+    sound_synth($sound, 0, 0);
+    if ($initial_obj = strung_dragonstone_amulet) {
+        mes("You successfully enchant the dragonstone amulet.");
+    } else {
+        mes("You successfully enchant the <lowercase(oc_name($initial_obj))>.");
+    }
+    p_delay(1);
+    if (afk_event = ^true) {
+        ~macro_event_general_spawn(~macro_event_set_random);
+        return;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//if(inv_total(inv,trail_clue_easy_map001) > 0){
+//    ~magic_teleport(^varrock_teleport);
+//    ~botwalk(0_50_53_12_3);
+//    ~botwalk(0_49_52_42_32);
+//    ~dig;
+//    world_delay(1);
+    //~_trail_casket_easy;
+//}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[proc,clue_scroll_easy]
+mes("Gathering Easy Clue Scrolls");
+
+~botrun(0,999,true);
+~botwalk(0_48_54_29_53);
+~bot_oploc(0_48_54_29_53,loc_1516,1);
+~botwalk(0_48_54_28_53);
+~bot_oploc(0_48_54_28_53,loc_1517,1);
+
+~botwalk(0_48_54_23_54);
+
+while(p_finduid(uid) = true & inv_freespace(inv) > 0){
+    ~loot_man(~fight_man(man,3));
+    ~loot_man(~fight_man(man2,3));
+    ~loot_man(~fight_man(man3,3));
+    world_delay(1);
+}
+~deposit_loot_from_men;
+
+
+
+[proc,fight_man](npc $npc, int $range)(coord)
+def_coord $npcCoord = coord;
+
+if(npc_find(0_48_54_25_54, $npc, $range, 0) = true){
+    if(p_finduid(uid) = true){
+        p_opnpc(2);
+    }
+    // While in combat
+    while(p_finduid(uid) = true & npc_stat(hitpoints) > 0){
+        mes("in combat");
+        p_opnpc(2);
+        world_delay(1);
+    }
+    if_close;
+
+    return(npc_coord);
+}
+if(npc_find(0_48_54_21_54, $npc, $range, 0) = true){
+    if(p_finduid(uid) = true){
+        p_opnpc(2);
+    }
+    // While in combat
+    while(p_finduid(uid) = true & npc_stat(hitpoints) > 0){
+        mes("in combat");
+        p_opnpc(2);
+        world_delay(1);
+    }
+    if_close;
+
+    return(npc_coord);
+}
+
+
+
+
+[proc,loot_man](coord $npc_coord)
+if($npc_coord = null){
+    return;
+}
+world_delay(2);
+//~botwalk($npc_coord);
+obj_findallzone($npc_coord);
+while(p_finduid(uid) = true & obj_findnext() = true & inv_freespace(inv) > 0){//////////////////////////////this can be improved
+    switch_obj(active_obj) {
+        case bones : ~destroy;
+
+        case unidentified_guam : ~destroy;
+        case unidentified_marrentill : ~destroy;
+        case unidentified_tarromin : ~destroy;
+        case unidentified_harralander : ~destroy;
+        case unidentified_ranarr : ~destroy;
+        case unidentified_irit : ~destroy;
+        case unidentified_avantoe : ~destroy;
+        case unidentified_kwuarm : ~destroy;
+        case unidentified_cadantine : ~destroy;
+        case unidentified_lantadyme : ~destroy;
+        case unidentified_dwarf_weed : ~destroy;
+
+        case coins : ~destroy;
+        case fishing_bait : ~destroy;
+        case iron_dagger : ~destroy;
+        case bronze_med_helm : ~destroy;
+        case bolt : ~destroy;
+        case copper_ore : ~destroy;
+        case earth_talisman : ~destroy;
+        case cabbage : ~destroy;
+        case mindrune : ~destroy;
+        case chaosrune : ~destroy;
+        case earthrune : ~destroy;
+        case firerune : ~destroy;
+        
+
+        case bronze_arrow : ~pick_up(0);
+        case iron_arrow : ~pick_up(0);
+        case iron_knife : ~pick_up(0);
+
+        case default : ~pick_up(1);
+    }
+    obj_findallzone($npc_coord); 
+}
+equip_arrows;
+
+
+
+
+[proc,deposit_loot_from_men]
+~botwalk(0_48_54_28_53);
+~bot_oploc(0_48_54_29_53,loc_1516,1);
+~botwalk(0_48_54_29_53);
+~bot_oploc(0_48_54_28_53,loc_1517,1);
+
+~botwalk(0_48_54_24_38);
+~bot_bank_deposit_all(0_48_54_24_37,0);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[proc,hellhound]
+
+def_coord $safespot = 0_44_153_37_51;
+
+~botwalk(0_44_153_37_51);
+
+while(p_finduid(uid) = true){
+    def_coord $npcCoord = ~fight_with_safespot($safespot, hellhound, 10);
+    ~loot_hellhound($npcCoord);
+}
+
+
+
+
+[proc,fight_with_safespot](coord $safespot, npc $npc, int $range)(coord)
+if(npc_find($safespot, $npc, $range, ^vis_off) = true){
+    p_opnpc(2);
+    ~walk_to_safe_spot($safespot);
+    while(p_finduid(uid) = true & npc_stat(hitpoints) > 0){
+        mes("in combat");
+        p_opnpc(2);
+        world_delay(2);
+        if(coord ! $safespot){
+            ~walk_to_safe_spot($safespot);
+        }
+    }
+    if_close;
+    return(npc_coord);
+}
+return(coord);
+
+
+
+
+
+
+
+
+
+
+
+
+
+[proc,buy_varrok]
+mes("Buying from the shops in Varrok");
+while(inv_total(inv,coins) > 100){
+    ~bot_open_shop(0_50_53_33_33, lowe);
+    while(inv_getnum(archeryshop, 0) > 1910 & inv_getnum(archeryshop, 1) > 1475 & p_finduid(uid) = true & inv_total(inv,coins) > 1000){
+        ~buy_stackable_item(archeryshop, 0, 1910, bronze_arrow);
+        ~buy_stackable_item(archeryshop, 1, 1475, iron_arrow);
+        world_delay(1);
+    }
+    if_close;
+
+
+    ~bot_open_shop(0_50_53_53_9, aubury);
+    while(inv_getnum(runeshop, 0) > 1980 & inv_getnum(runeshop, 1) > 1980 & inv_getnum(runeshop, 2) > 1980 & inv_getnum(runeshop, 3) > 1980 & inv_getnum(runeshop, 4) > 975 & inv_total(inv, coins) > 1000 & p_finduid(uid) = true){
+        ~buy_stackable_item(runeshop, 0, 1980, firerune);
+        ~buy_stackable_item(runeshop, 1, 1980, waterrune);
+        ~buy_stackable_item(runeshop, 2, 1980, airrune);
+        ~buy_stackable_item(runeshop, 3, 1980, earthrune);
+        ~buy_stackable_item(runeshop, 4, 975, mindrune);
+        ~buy_stackable_item(runeshop, 6, 499, chaosrune);
+        ~buy_stackable_item(runeshop, 7, 499, deathrune);
+
+        world_delay(1);
+    }
+    world_delay(1);
+    if_close;
+}
+

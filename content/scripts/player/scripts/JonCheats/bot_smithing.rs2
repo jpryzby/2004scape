@@ -1,19 +1,21 @@
 
 [debugproc,smith]
 mes("Smithing");
-while(p_finduid(uid) = true){
+
+def_obj $bar = iron_bar;
+def_obj $crafting_object = iron_knife;
+
+while(p_finduid(uid) = true & inv_total(bank,$bar) > 1 & inv_total(inv,$bar) > 0){
     ~botwalk(0_49_53_51_34);  //walk to anvil
     facesquare(0_49_53_52_34);
-
-    if(p_finduid(uid) = true){
-        ~attempt_smithing(iron_knife, 26);
-    }
-
-    world_delay(1);
+    
+    ~attempt_smithing($crafting_object, 26);
     if_close;
 
     ~botwalk(0_49_53_49_44);  //walk to bank
-    ~bot_bank_withdraw(0_49_53_50_44, iron_bar, 26);  //withdraw bars
+    if_close;
+    ~bot_bank_withdraw(0_49_53_50_44, $bar, 26);  //withdraw bars
+    world_delay(1);
 }
 
 

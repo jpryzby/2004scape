@@ -1,0 +1,13 @@
+[debugproc,grind_unicorn_horn]
+mes("Grinding Unicorn Horns");
+while(p_finduid(uid) = true & inv_total(bank,unicorn_horn) > 1){
+    def_int $slot = 1;
+    while(p_finduid(uid) = true & inv_total(inv,unicorn_horn) > 0){
+        ~attempt_grind_ingredient(0, $slot);
+        world_delay(1);
+        $slot = calc($slot + 1);
+    }
+
+    ~bot_bank_deposit_all(0_46_52_1_39,1);
+    ~bot_bank_withdraw(0_46_52_1_39,unicorn_horn,27);
+}

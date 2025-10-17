@@ -1,0 +1,56 @@
+[debugproc,make_potion]
+~botwalk(0_46_52_1_41);
+~botwalk(0_46_52_1_40);
+~bot_bank_deposit_all(0_46_52_1_39,0);
+
+~make_potion(guam_leaf,unidentified_guam,eye_of_newt,guamvial);                //Attack Potion 3
+//~make_potion(marentill,unidentified_marentill,unicorn_horn_dust,marrentillvial);     //Antipoison 5
+//~make_potion(tarromin,unidentified_tarromin,limpwurt_root,tarrominvial);           //Strength Potion 12
+//~make_potion(harralander,unidentified_harralander,red_spiders_eggs,harralandervial);    //Restore Potion 22
+//~make_potion(harralander,unidentified_harralander,chocolate_dust,harralandervial);    //Energy Potion 26
+//~make_potion(ranarr_weed,unidentified_ranarr_weed,white_berries,ranarrvial);     //Defense Potion 30
+//~make_potion(ranarr_weed,unidentified_ranarr_weed,snape_grass,ranarrvial);       //Prayer Potion 38
+//~make_potion(irit_leaf,unidentified_irit_leaf,eye_of_newt,iritvial);           //Super Attack Potion 45
+//~make_potion(avantoe,unidentified_avantoe,snape_grass,avantoevial);               //Fishing Potion 50
+//~make_potion(kwuarm,unidentified_kwuarm,limpwurt_root,kwuarmvial);               //Super Strength Potion 55
+//~make_potion(kwuarm,unidentified_kwuarm,dragon_scale_dust,kwuarmvial);           //Weapon Poison 60
+//~make_potion(cadantine,unidentified_cadantine,white_berries,cadantinevial);         //Super Defense Potion 66
+//~make_potion(lantadyme,unidentified_lantadyme,dragon_scale_dust,lantadymevial);     //Antifire Potion 69
+//~make_potion(dwarf_weed,unidentified_dwarf_weed,wine_of_zamorak,dwarfweedvial);     //Ranging Potion 72
+//~make_potion(torstol,unidentified_torstol,jangerberries,torstolvial);             //Zamorak brew Potion 78
+
+
+
+
+[proc,make_potion](namedobj $herb, namedobj $unid, namedobj $secondary_ingredient,namedobj $unf_potion)
+def_struct $struct = ~get_brew_struct($unf_potion, $secondary_ingredient);
+def_int $current_level = stat(herblore);
+def_int $herb_level = struct_param($struct, brew_potion_level);
+if ($current_level > $herb_level) {
+    while(p_finduid(uid) = true & inv_total(bank,$unid) > 14 & inv_total(bank,$secondary_ingredient) > 14 & inv_total(bank,vial_water) > 14){
+        ~bot_bank_withdraw(0_46_52_1_39,$unid,14);
+        ~bot_bank_withdraw(0_46_52_1_39,vial_water,14);
+        
+        def_int $count = 0;
+        while(inv_total(inv,$unid) > 0 & p_finduid(uid) = true){
+            ~attempt_identify_herb($herb, $count);
+            if_close;
+            ~attempt_brew_potion($count, calc($count + 14));
+            world_delay(1);
+            $count = calc($count + 1);
+        }
+
+        ~bot_bank_withdraw(0_46_52_1_39,$secondary_ingredient,14);
+
+        $count = 0;
+        while(inv_total(inv, $secondary_ingredient) > 0 & p_finduid(uid) = true){
+            ~attempt_brew_potion($count, calc($count + 14));
+            world_delay(1);
+            if_close;
+            $count = calc($count + 1);
+        }
+
+        ~bot_bank_deposit_all(0_46_52_1_39,0);
+    }
+}
+

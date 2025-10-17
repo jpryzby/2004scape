@@ -1,46 +1,45 @@
-[debugproc,fletch]
-mes("crafting maple longbow");
+[debugproc,fletch_willow] ~fletch(willow_logs, willow_longbow, unstrung_willow_longbow);
+[debugproc,fletch_maple] ~fletch(maple_logs, maple_longbow, unstrung_maple_longbow);
+[debugproc,fletch_yew] ~fletch(yew_logs, yew_longbow, unstrung_yew_longbow);
+[debugproc,fletch_magic] ~fletch(magic_logs, magic_longbow, unstrung_magic_longbow);
 
-//def_namedobj $logType = willow_logs;
-//def_namedobj $logType = maple_logs;
-def_namedobj $logType = yew_logs;
-//def_namedobj $logType = magic_logs;
+
+
+[proc,fletch](namedobj $log, namedobj $bowType, namedobj $unstrung_bowType)
+mes("Fletching Bows");
+
+~botwalk(0_46_52_1_41);
+~botwalk(0_46_52_1_40);
+~bot_bank_deposit_all(0_46_52_1_39,0);
+~bot_bank_withdraw(0_46_52_1_39, knife, 1);
 
 def_int $loop_count = 0;
-while(p_finduid(uid) = true){
+while(p_finduid(uid) = true & inv_total(bank,$log) > 1 & inv_total(bank,bow_string) > 1){
     mes("You have completed <tostring($loop_count)> runs");
 
-    ~bot_fletch_bow();
-    ~bot_bank_deposit(0_42_54_39_38, 27);
-    ~bot_bank_withdraw(0_42_54_39_38, $logType, 27);
+    ~bot_bank_withdraw(0_46_52_1_39, $log, 13);
+    ~bot_bank_withdraw(0_46_52_1_39, bow_string, 13);
+    ~bot_fletch_bow($log,$bowType);
+    while(inv_total(inv,$unstrung_bowType) > 0 & inv_total(inv,bow_string) > 0 & p_finduid(uid) = true){
+        ~bot_string_bow($unstrung_bowType);
+    }
 
+    ~bot_bank_deposit_all(0_46_52_1_39,1);
+    
     $loop_count = calc($loop_count + 1);
 }
 
 
 
 
-[proc,bot_fletch_bow]
+[proc,bot_fletch_bow](obj $log, namedobj $bowType)
 
-//def_namedobj $bowType = willow_shortbow;
-//def_namedobj $bowType = willow_longbow;
-//def_namedobj $bowType = maple_shortbow;
-//def_namedobj $bowType = maple_longbow;
-//def_namedobj $bowType = yew_shortbow;
-def_namedobj $bowType = yew_longbow;
-//def_namedobj $bowType = magic_shortbow;
-//def_namedobj $bowType = magic_longbow;
+
 
 def_boolean $isLongbow = true;
 //def_boolean $isLongbow = false;
 
-
-def_int $inventory_slot = 0;
-while($inventory_slot < 27){
-
-    p_finduid(uid);
-    def_obj $log = inv_getobj(inv,27);
-    p_finduid(uid);
+while(inv_total(inv,$log) > 0 & p_finduid(uid) = true){
 
     db_find(fletch_bow_table:log, $log);
     def_dbrow $data = db_findnext;
@@ -71,5 +70,4 @@ while($inventory_slot < 27){
     world_delay(1);
     if_close;
 
-    $inventory_slot = add($inventory_slot,1);
 }

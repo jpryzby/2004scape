@@ -5,6 +5,9 @@
 //def_obj $uncooked_item = raw_sardine;
 //def_obj $uncooked_item = raw_trout;
 def_obj $uncooked_item = raw_salmon;
+//def_obj $uncooked_item = raw_cod;
+//def_obj $uncooked_item = raw_mackerel;
+//def_obj $uncooked_item = raw_bass;
 //def_obj $uncooked_item = ________;
 
 
@@ -16,7 +19,7 @@ def_obj $uncooked_item = raw_salmon;
 
 
 [proc,cook](obj $uncooked_item)
-while(p_finduid(uid) = true){
+while(p_finduid(uid) = true & (inv_total(inv,$uncooked_item) > 0 | inv_total(bank,$uncooked_item) > 1)){
     if(p_finduid(uid) = true & loc_find(0_44_53_1_52, loc_2728) = true){
         mes("cooking");
 

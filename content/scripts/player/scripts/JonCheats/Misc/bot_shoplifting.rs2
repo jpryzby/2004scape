@@ -1,0 +1,69 @@
+[debugproc,steal_cake]
+~bot_steal_from_stall(bakers_stall_stealing,0_41_51_43_46,0_41_51_44_48);
+
+[debugproc,steal_silk]
+~bot_steal_from_stall(silk_stall_stealing,0_41_51_38_50,0_41_51_39_52);
+
+
+
+
+
+[proc,bot_steal_from_stall](loc $loc, coord $loc_coord, coord $standing_spot)
+mes("Stealing in Ardougne");
+~botwalk($standing_spot);
+
+while(p_finduid(uid) = true){
+    db_find(stealing:loc, $loc);
+    def_dbrow $data = db_findnext;
+    if ($data = null) {
+        ~displaymessage(^dm_default);
+        return;
+    }
+
+    if (loc_find($loc_coord,$loc) = true & ~bot_steal_check($loc) = false & add(%lastcombat, 10) <= map_clock) {
+        mes("stealing");
+        ~bot_oploc($loc_coord,$loc,2);
+        world_delay(1);
+        if_close;
+        inv_delslot(inv,0);
+    } else {
+        mes("waiting");
+        world_delay(1);
+    }
+}
+
+
+
+[proc,bot_steal_check](loc $loc)(boolean)
+db_find(stealing:loc, $loc);
+def_dbrow $data = db_findnext;
+if ($data = null) {
+    ~displaymessage(^dm_default);
+    return(false);
+}
+
+def_int $npc_count = db_getfieldcount($data, stealing:guard);
+def_npc $npc1 = db_getfield($data, stealing:guard, min(0, $npc_count));
+def_npc $npc2 = db_getfield($data, stealing:guard, min(1, $npc_count));
+def_npc $npc3 = db_getfield($data, stealing:guard, min(2, $npc_count));
+def_npc $npc4 = db_getfield($data, stealing:guard, min(3, $npc_count));
+def_npc $npc5 = db_getfield($data, stealing:guard, min(4, $npc_count));
+def_npc $owner = db_getfield($data, stealing:owner, 0);
+
+npc_huntall(coord, 5, 0);
+while (npc_huntnext = true) {
+    if ((npc_type = $npc1 | npc_type = $npc2 | npc_type = $npc3 | npc_type = $npc4 | npc_type = $npc5)
+        & npc_getmode ! opplayer2 & lineofsight(npc_coord, coord) = true) {
+        return(true);
+    }
+}
+
+if (npc_find(coord, $owner, 5, 0) = true & lineofsight(npc_coord, coord) = true){
+    return(true);
+}
+
+return(false);
+
+
+
+

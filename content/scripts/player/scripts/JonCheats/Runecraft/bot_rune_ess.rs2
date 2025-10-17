@@ -7,7 +7,7 @@ while(p_finduid(uid) = true){
     ~botwalk(0_50_53_53_7);
     ~teleport_to_essence_mine(^essence_mine_to_aubury);
     ~mine_ess_rock;
-    //~bank_ess
+    //~bank_ess;
 }
 
 
@@ -19,15 +19,7 @@ while(p_finduid(uid) = true){
 
 
 [proc,teleport_to_essence_mine](coord $tele_back_coord)
-if(npc_find(0_50_53_53_7, aubury, 6, 0) = true & p_finduid(uid) = true) { 
-    p_finduid(uid);
-    p_opnpc(1);
-    //def_int $choice = ~p_choice2($string1, 1, $string2, 2);
-    //if ($choice = 1) jump($label1);
-    //jump($label2);
-    
-    world_delay(10);
-
+if(p_finduid(uid) = true & npc_find(0_50_53_53_7, aubury, 6, 0) = true) { 
     if_close;
     %exit_essence_mine_coord = $tele_back_coord;
     // this is lowercase
@@ -52,11 +44,27 @@ if(npc_find(0_50_53_53_7, aubury, 6, 0) = true & p_finduid(uid) = true) {
 
 
 
+//[proc,teleport_to_essence_mine2](coord $tele_back_coord)
+//if(npc_find(0_50_53_53_7, aubury, 6, 0) = true & p_finduid(uid) = true) {
+//    ~botwalk(npc_coord);
+//    ~bot_chatnpc("<p,happy>Do you want to buy some runes?");
+//    if(%runemysteries_progress = ^runemysteries_complete) {
+//        ~bot_multi3("Yes please!", aubury_shop, "Oh, it's a rune shop. No thank you, then.", aubury_no, "Can you teleport me to the Rune Essence?", bot_aubury_ess,3);
+//    } else {
+//        ~bot_multi2("Yes please!", aubury_shop, "Oh, it's a rune shop. No thank you, then.", aubury_no,1);
+//    }   
+//}
+
+
+
+
+
+
+
 
 [proc,mine_ess_rock]
 
 //walk to ess rocks
-//JPTODO: implement logic to go to whichever rock is closest
 
 def_coord $walk_coord = 0_45_75_49_53;
 def_coord $rock_coord = 0_45_75_45_48;
@@ -118,7 +126,7 @@ if(loc_find($rock_coord, loc_2491) = true & p_finduid(uid) = true) {
 
 
 //Wait until inventory is full
-while(inv_freespace(inv) > 0 ) {
+while(p_finduid(uid) = true & inv_freespace(inv) > 0 ) {
     if_close;
     world_delay(1);
 }
@@ -148,3 +156,8 @@ if(loc_find($portal_coord, loc_2492) = true & p_finduid(uid) = true) {
 ~bot_bank_deposit(0_50_53_54_27, 27);
 
 
+
+
+[label,bot_aubury_ess]
+~bot_chatplayer("<p,quiz>Can you teleport me to the Rune Essence?");
+~teleport_to_essence_mine(^essence_mine_to_aubury);

@@ -1,0 +1,24 @@
+[debugproc,make_all_potions]
+mes("Making All Potions");
+~botwalk(0_46_52_1_41);
+~botwalk(0_46_52_1_40);
+~bot_bank_deposit_all(0_46_52_1_39,0);
+
+~make_potion(guam_leaf,unidentified_guam,eye_of_newt,guamvial);                         //Attack Potion 3
+~make_potion(marentill,unidentified_marrentill,unicorn_horn_dust,marrentillvial);       //Antipoison 5
+~make_potion(tarromin,unidentified_tarromin,limpwurt_root,tarrominvial);                //Strength Potion 12
+~make_potion(harralander,unidentified_harralander,red_spiders_eggs,harralandervial);    //Restore Potion 22
+//~make_potion(harralander,unidentified_harralander,chocolate_dust,harralandervial);    //Energy Potion 26
+//~make_potion(ranarr_weed,unidentified_ranarr,white_berries,ranarrvial);               //Defense Potion 30
+~make_potion(ranarr_weed,unidentified_ranarr,snape_grass,ranarrvial);                   //Prayer Potion 38
+~make_potion(irit_leaf,unidentified_irit,eye_of_newt,iritvial);                         //Super Attack Potion 45
+//~make_potion(irit_leaf,unidentified_irit,unicorn_horn_dust,iritvial);                 //Super antipoison
+~make_potion(avantoe,unidentified_avantoe,snape_grass,avantoevial);                     //Fishing Potion 50
+~make_potion(kwuarm,unidentified_kwuarm,limpwurt_root,kwuarmvial);                      //Super Strength Potion 55
+//~make_potion(kwuarm,unidentified_kwuarm,dragon_scale_dust,kwuarmvial);                //Weapon Poison 60
+~make_potion(cadantine,unidentified_cadantine,white_berries,cadantinevial);             //Super Defense Potion 66
+~make_potion(lantadyme,unidentified_lantadyme,dragon_scale_dust,lantadymevial);         //Antifire Potion 69
+~make_potion(dwarf_weed,unidentified_dwarf_weed,wine_of_zamorak,dwarfweedvial);         //Ranging Potion 72
+~make_potion(torstol,unidentified_torstol,jangerberries,torstolvial);                   //Zamorak brew Potion 78
+
+~combine_all_potions;

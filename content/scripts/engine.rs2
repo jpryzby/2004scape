@@ -1064,3 +1064,5 @@
 [command,equip_arrows]
 // info: returns the active object
 [command,active_obj]()(namedobj)
+//Force walk to coordinates
+[command,force_walk](coord $dest)

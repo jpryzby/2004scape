@@ -1,61 +1,107 @@
 [debugproc,firegiant]
-mes("test loot");
+mes("Hunting Fire Giants");
 
-
+~gear_check_fire_giant;
 while(p_finduid(uid) = true){
-    mes("Fighting");
-    def_coord $loot_coord = ~fight_fire_giant;
+    ~walk_from_bank_to_fire_giant;
 
-    mes("Looting");
-    ~loot_fire_giant($loot_coord);
-
-    mes("Reseting");
+    while(p_finduid(uid) = true & inv_freespace(inv) > 0){
+        def_coord $loot_coord = ~fight_fire_giant;
+        ~loot_fire_giant($loot_coord);
+        world_delay(1);
+    }
+    ~deposit_firegiant;
+    ~bot_heal(0_41_51_32_19);
 }
 
+
+
+
+
+
+[proc,gear_check_fire_giant]
+~botwalk(0_41_51_31_19);
+~bot_bank_deposit_all(0_41_51_32_19,0);
+~bot_bank_withdraw(0_41_51_32_19,glarials_amulet_waterfall_quest,1);
+~try_equip(2);
+~bot_bank_deposit_all(0_41_51_32_19,0);
+~bot_bank_withdraw(0_41_51_32_19,waterrune,^max_32bit_int);
+~bot_bank_withdraw(0_41_51_32_19,lawrune,^max_32bit_int);
+~bot_bank_withdraw(0_41_51_32_19,rope,1);
+
+
+
+
+
+
+[proc,walk_from_bank_to_fire_giant]
+~botwalk(0_41_51_19_32);
+~botwalk(0_41_52_16_6);
+~botwalk(0_40_52_52_61);
+~botwalk(0_40_53_13_13);
+~botwalk(0_40_53_6_34);
+~botwalk(0_39_54_59_4);
+~botwalk(0_39_54_36_22);
+~botwalk(0_39_54_32_39);
+//~bot_oploc();
+
+~botwalk(0_39_54_17_39);
+//~bot_oploc();
+
+~botwalk(0_39_54_14_38);
+//~bot_oploc();
+world_delay(5);
+
+
+~botwalk(0_39_54_16_20);
+//Rope to rock
+world_delay(10);
+
+~botwalk(0_39_54_17_10);
+//Rope to dead tree
+world_delay(10);
+
+//open ledge
+//~bot_oploc();
+
+~botwalk(0_40_154_5_25);
+//~bot_oploc();
+
+~botwalk(0_40_154_8_37);
 
 
 ////////// Fight Fire Giants //////////
 [proc,fight_fire_giant]()(coord)
-
 ~botrun(50,999,true);
-//go to safety spot//////////////////broken
-~botwalk(0_40_154_6_34);
+def_coord $safe_spot1 = 0_40_154_8_36;
+def_coord $safe_spot2 = 0_40_154_8_37;
+def_coord $active_safe_spot = $safe_spot1;
 
 
-//find an enemy near 0_40_154_3_29
-if(npc_find(0_40_154_3_29, firegiant, 3, 0) = true){
-    //mes("found firegiant");
+~botwalk($active_safe_spot);
 
-    def_coord $giantCoord = npc_coord;
-    if(p_finduid(uid) = true){
-        p_opnpc(2);
-    }
-    world_delay(10);
-    
+if(npc_find(0_40_154_6_34, firegiant, 5, 0) = true){
+
+    p_opnpc(2);
+
+
     // While in combat
-    while(add(%npc_lastcombat, 8) > map_clock){
-
-        if(p_finduid(uid) = true & coord ! 0_40_154_6_34){
-            p_walk(0_40_154_6_34);
-            while(coord ! 0_40_154_6_34){
-                world_delay(1);
-                mes("walking back to safety spot");
-                p_telejump(0_40_154_6_34);
-                //p_walk(0_40_154_6_34); /////////////////////////////currently not working
-            }
-            p_opnpc(2);
+    while(p_finduid(uid) = true & npc_stat(hitpoints) > 0){
+        ~walk_to_safe_spot($active_safe_spot);
+        if(add(%lastcombat, 10) >= map_clock){
+            $active_safe_spot = $safe_spot2;
         }
 
-        $giantCoord = npc_coord;
-        //mes("in combat");
+        p_opnpc(2);
         if_close;
+
         world_delay(1);
     }
-    //mes("left combat");
-    //~loot_fire_giant($giantCoord);
 
-    return ($giantCoord);
+    if_close;
+    return (npc_coord);
 }
+
 
 
 
@@ -63,13 +109,15 @@ if(npc_find(0_40_154_3_29, firegiant, 3, 0) = true){
 
 ////////// Loot //////////
 [proc,loot_fire_giant](coord $giantCoord)
-
+world_delay(2);
+~botwalk($giantCoord);
 obj_findallzone($giantCoord);
-while(obj_findnext() = true & inv_freespace(inv) > 0){
+while(p_finduid(uid) = true & obj_findnext() = true & inv_freespace(inv) > 0){
     ~botwalk($giantCoord);
     switch_obj(active_obj) {
-        case big_bones : ~bury;
+        case big_bones : ~bury(big_bones);
 
+        case coins : ~destroy;
         case uncut_sapphire : ~destroy;
         case uncut_emerald : ~destroy;
         case lobster : ~destroy;
@@ -81,17 +129,18 @@ while(obj_findnext() = true & inv_freespace(inv) > 0){
         case unidentified_harralander : ~destroy;
 
         case bronze_arrow : ~pick_up(0);
-        case bronze_knife : ~pick_up(0);
+        case iron_arrow : ~pick_up(0);
         case iron_knife : ~pick_up(0);
 
         case default : ~pick_up(1);
     }
     obj_findallzone($giantCoord); 
 }
+equip_arrows;
 
 
 
-
-
-
-
+[proc,deposit_firegiant]
+~magic_teleport(^ardougne_teleport);
+~botwalk(0_41_51_31_19);
+~bot_bank_deposit_all(0_41_51_32_19,3);

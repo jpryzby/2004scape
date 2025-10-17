@@ -2,71 +2,62 @@
 mes("Stringing bows");
 //string bows
 
-//def_obj $bow_type = unstrung_maple_longbow;
-def_obj $bow_type = unstrung_yew_longbow;
+def_obj $unstrung_bow = unstrung_willow_longbow;
+//def_obj $unstrung_bow = unstrung_maple_longbow;
+//def_obj $unstrung_bow = unstrung_yew_longbow;
+//def_obj $unstrung_bow = unstrung_magic_longbow;
 
 
-while(p_finduid(uid) = true){
-    if(p_finduid(uid) = true){
+~botwalk(0_46_52_1_41);
+~botwalk(0_46_52_1_40);
 
-        
+while(p_finduid(uid) = true & inv_total(bank,$unstrung_bow) > 0 & inv_total(bank,bow_string) > 1){
+    ~bot_bank_deposit_all(0_46_52_1_39, 0);
+    ~bot_bank_withdraw2(0_46_52_1_39, $unstrung_bow, 14);
+    ~bot_bank_withdraw(0_46_52_1_39, bow_string, 14);
+    
+    ~bot_string_bow($unstrung_bow);
 
-
-
-        //string 14 bows
-        def_int $count = 0;
-        while($count < 14){
-            ~string_bow($bow_type);
-            world_delay(1);
-            if_close;
-            $count = calc($count + 1);
-        }
-        
-        //deposit bows
-        ~bot_bank_deposit(0_42_54_39_38, 0);
-
-        //withdraw materials
-        ~bot_bank_withdraw(0_42_54_39_38, bow_string, 14);
-        ~bot_bank_withdraw(0_42_54_39_38, $bow_type, 14);
-
-        world_delay(1);
+    world_delay(1);
+}
 
 
+
+
+
+
+
+
+
+
+
+
+[proc,bot_string_bow](obj $unstrung_bow)
+while(inv_total(inv,$unstrung_bow) > 0 & inv_total(inv,bow_string) > 0 & p_finduid(uid) = true){
+    if (map_members = ^false) {
+        mes(^mes_members_fletching); // guess
+        return;
+    }
+    def_dbrow $data = ~get_fletching_data($unstrung_bow);
+    if ($data = null) {
+        ~displaymessage(^dm_default);
+        return;
+    }
+    def_int $level = db_getfield($data, fletching_table:level, 0);
+    if (stat(fletching) < $level) {
+        // osrs
+        mes("You need level <tostring($level)> Fletching to string that bow.");
+        return;
     }
 
+    // make one bow at a time
+    inv_del(inv, $unstrung_bow, 1);
+    inv_del(inv, bow_string, 1);
+    mes("You add a string to the bow.");
+
+    stat_advance(fletching, db_getfield($data, fletching_table:experience, 0));
+    inv_add(inv, db_getfield($data, fletching_table:product, 0));
+    world_delay(1);
+    if_close;
 }
 
-
-
-
-
-
-
-
-
-
-[proc,string_bow](obj $unstrung_bow)
-if (map_members = ^false) {
-    mes(^mes_members_fletching); // guess
-    return;
-}
-def_dbrow $data = ~get_fletching_data($unstrung_bow);
-if ($data = null) {
-    ~displaymessage(^dm_default);
-    return;
-}
-def_int $level = db_getfield($data, fletching_table:level, 0);
-if (stat(fletching) < $level) {
-    // osrs
-    mes("You need level <tostring($level)> Fletching to string that bow.");
-    return;
-}
-
-// make one bow at a time
-inv_del(inv, $unstrung_bow, 1);
-inv_del(inv, bow_string, 1);
-// 2005-osrs, rsc
-mes("You add a string to the bow.");
-
-stat_advance(fletching, db_getfield($data, fletching_table:experience, 0));
-inv_add(inv, db_getfield($data, fletching_table:product, 0));

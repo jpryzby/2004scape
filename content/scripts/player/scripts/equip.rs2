@@ -332,6 +332,7 @@ if (oc_stackable($equip_obj) = true & inv_total(worn, $equip_obj) > 0) {
         return(false);
     }
     inv_moveitem(inv, worn, $equip_obj, sub($equip_obj_num, $overflow)); // equip stackable item!
+    buildappearance(worn);
     return(true); // early return because if the worn item already exists in the inv, theres no conflicts *surely*
 }
 
@@ -346,7 +347,7 @@ if (inv_getobj(inv, $inv_slot) ! null) {
     inv_movefromslot(inv, inv, $inv_slot); // moves item to the first available slot in the inv...
 }
 ~unequip_conflicts($equip_obj);
-
+buildappearance(worn);
 return(true);
 
 // proc to check if you have enough space to unequip conflicting items with $equip_obj

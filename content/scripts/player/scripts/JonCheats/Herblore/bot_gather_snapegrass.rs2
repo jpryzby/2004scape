@@ -1,0 +1,38 @@
+[debugproc,gather_snape_grass]
+mes("Gathering Snape Grass");
+
+while(p_finduid(uid) = true){
+    ~walk_to_hobgoblins1;
+    //~hunt_hobgoblins;
+
+
+
+    while(p_finduid(uid) = true & inv_freespace(inv) > 0){
+        obj_findallzone(0_45_51_26_32);
+        if(p_finduid(uid) = true & obj_findnext() = true & inv_freespace(inv) > 0){
+            ~botwalk(obj_coord);
+            ~pick_up(1);
+        }else{
+            def_coord $loot_coord = ~fight(hobgoblin_unarmed,20,0_45_51_28_24);
+            ~loot_hobgoblin($loot_coord);
+        }
+        world_delay(1);
+    }
+
+
+    
+    ~return_from_hobgoblins;
+
+    ~bot_bank_deposit_all(0_47_52_4_26,0);
+    ~bot_heal(0_47_52_4_26);
+}
+
+
+
+
+
+[proc,walk_to_hobgoblins1]
+~botwalk(0_46_51_62_54);
+~botwalk(0_46_51_16_14);
+~botwalk(0_45_50_49_63);
+~botwalk(0_45_51_26_32);

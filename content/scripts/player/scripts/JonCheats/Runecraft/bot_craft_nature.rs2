@@ -1,7 +1,8 @@
 [debugproc,craft_nature]
 mes("Crafting Natures");
 
-while(inv_total(inv, cert_blankrune) > 24){
+~botwalk(0_43_48_17_52);
+while(p_finduid(uid) = true & inv_total(inv, cert_blankrune) > 24){
     //go to general store
     ~botrun(0,999,true);
     if(npc_find(0_43_48_15_50, jiminua, 6, 0) = true & p_finduid(uid) = true) {
@@ -74,7 +75,7 @@ def_int $shop_stock = calc(inv_total(%shop, $obj));
 def_int $space_overflow = inv_itemspace2(inv, $obj, $amount, inv_size(inv));
 def_int $total_cost = 0;
 // Since pricing and stock will change constantly we will have to iterate here to calc
-while($i < $amount) {
+while(p_finduid(uid) = true & $i < $amount) {
     def_int $added_amt = ~adjusted_item_cost_buying($obj, calc($shop_stock - $i));
     def_int $current_stock = calc($shop_stock - $i);
     if(calc($total_cost + $added_amt) > $current_gp) {
@@ -127,7 +128,7 @@ if(inv_itemspace(%shop, oc_uncert($obj), $sell_amount, inv_size(%shop)) = false)
 }
 // Iteration to calc the total value of the sale
 def_int $i = 0;
-while($i < $sell_amount) {
+while(p_finduid(uid) = true & $i < $sell_amount) {
     def_int $added_amt = ~adjusted_item_cost_selling(oc_uncert($obj), calc($shop_total + $i));
     $total_value = calc($total_value + $added_amt);
     $i = calc($i + 1);

@@ -1,0 +1,102 @@
+[debugproc,gather_white_berries]
+mes("Gathering White Berries");
+while(p_finduid(uid) = true){
+    //gear check
+    ~walk_to_berries;
+    ~gather_berries;
+    ~bank_berries;
+    //heal
+}
+
+
+
+[proc,walk_to_berries]
+    ~botwalk(0_39_73_45_41);
+    ~bot_oploc(0_39_73_46_41,loc_2872,1);
+    ~botwalk(0_48_61_20_53);
+
+    while(loc_find(0_48_61_21_53,loc_733) = true & p_finduid(uid) = true){
+        ~bot_oploc(0_48_61_21_53,loc_733,1);
+    }
+    while(loc_find(0_48_61_23_53,loc_733) = true & p_finduid(uid) = true){
+        ~bot_oploc(0_48_61_23_53,loc_733,1);
+    }
+
+    //walk to northern wilderness gate
+    ~botwalk(0_48_61_51_50);
+    ~botwalk(0_49_61_29_53);
+    ~botwalk(0_49_61_57_24);
+    ~botwalk(0_50_61_24_0);
+    ~bot_oploc(0_50_61_24_0,loc_1597,1);
+
+    //walk to red dragon pen
+    ~botwalk(0_50_60_1_16);
+    ~bot_oploc(0_50_60_1_16,loc_1597,1);
+    ~botrun(0,999,true);
+    ~botwalk(0_50_59_14_33);
+
+
+[proc,gather_berries]
+while(inv_freespace(inv) > 0 & p_finduid(uid) = true){
+    obj_findallzone(0_50_59_14_33);
+    if(p_finduid(uid) = true & inv_freespace(inv) > 0 & obj_findnext() = true){
+        switch_obj(active_obj) {
+            case white_berries : ~pick_up(1);
+            case default : ~destroy;
+        }
+    }
+    world_delay(1);
+}
+
+
+[proc,bank_berries]
+//exit red dragon pen
+~botwalk(0_50_60_1_15);
+~bot_oploc(0_50_60_1_16,loc_1597,1);
+
+//walk to northern wilderness
+~botwalk(0_50_60_24_63);
+~bot_oploc(0_50_61_24_0,loc_1597,1);
+
+//walk to mage arena, get through spider webs
+~botwalk(0_49_61_36_53);
+~botwalk(0_48_61_62_53);
+~botwalk(0_48_61_24_53);
+
+while(loc_find(0_48_61_23_53,loc_733) = true & p_finduid(uid) = true){
+    ~bot_oploc(0_48_61_23_53,loc_733,1);
+}
+world_delay(2);
+while(loc_find(0_48_61_21_53,loc_733) = true & p_finduid(uid) = true){
+    ~bot_oploc(0_48_61_21_53,loc_733,1);
+}
+world_delay(2);
+
+~botwalk(0_48_61_20_53);
+~bot_oploc(0_48_61_19_53,loc_2871,1);
+~botwalk(0_39_73_40_43);
+
+
+if(p_finduid(uid) = true & npc_find(0_39_73_40_43, magearena_banker, 8, 0) = true){
+    ~botwalk(npc_coord);
+    ~bot_chatplayer("<p,quiz>Hello, what are you doing out here?");
+    ~bot_chatnpc("<p,happy>I'm a banker, the only one around these dangerous parts.");
+
+    if_close;
+
+    ~bank_deposit_request(inv, white_berries, 28, 0);
+    world_delay(1);
+    
+    def_obj $food = trout;
+    def_int $heal_amount = 7;
+    def_int $amount_to_heal = calc(stat_base(hitpoints) - stat(hitpoints)); 
+    def_int $food_withdraw_quantity = calc($amount_to_heal / $heal_amount);
+
+    ~bank_withdraw_request(inv, $food, $food_withdraw_quantity, 0);
+    world_delay(1);
+    if_close;
+
+    while(inv_total(inv,$food) > 0 & p_finduid(uid) = true){
+        ~bot_eat($food);
+    }
+}

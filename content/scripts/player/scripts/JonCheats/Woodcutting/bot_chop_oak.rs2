@@ -1,4 +1,4 @@
-[debugproc,oak_log]
+[debugproc,chop_oak]
 mes("Chopping Oak Logs");
 
 def_int $lap_count = 0;
@@ -11,7 +11,7 @@ while(p_finduid(uid) = true){
     //Walk to the tree
     ~botwalk(0_49_53_30_28);
 
-    while(inv_freespace(inv) > 0){
+    while(inv_freespace(inv) > 0 & p_finduid(uid) = true){
         //if tree 1 available, chop that
         if(loc_find(0_49_53_31_28, oak_tree) = true & p_finduid(uid) = true) {
             ~chop_tree(0_49_53_31_28, oak_tree, 0_49_53_30_28);
@@ -20,7 +20,7 @@ while(p_finduid(uid) = true){
             if(loc_find(0_49_53_25_24, oak_tree) = true & p_finduid(uid) = true) {
                 ~chop_tree(0_49_53_25_24, oak_tree, 0_49_53_27_27);
             }else{
-                while(loc_find(0_49_53_31_28, oak_tree) = false & loc_find(0_49_53_25_24, oak_tree) = false){
+                while(loc_find(0_49_53_31_28, oak_tree) = false & loc_find(0_49_53_25_24, oak_tree) = false & p_finduid(uid) = true){
                     mes("waiting for tree respawn");
                     world_delay(2);
                     mes("waiting 3");
@@ -29,7 +29,8 @@ while(p_finduid(uid) = true){
         }
     }
     ~botwalk(0_49_53_49_44);
-    ~bot_bank_deposit(0_49_53_50_44, 27);
+    ~bot_bank_deposit_all(0_49_53_50_44, 0);
+    
 
     $lap_count = calc($lap_count + 1);
 }

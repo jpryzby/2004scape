@@ -1,10 +1,16 @@
 [debugproc,hunt_unicorn]
+mes("Hunting Unicorns");
+if(inv_total(inv,pestle_and_mortar) < 1){
+    mes("You forgot your mortar and pestle");
+    return;
+}
 while(p_finduid(uid) = true){
     ~walk_to_unicorns;
     ~hunt_unicorns;
     ~return_from_unicorn;
 
-    ~bot_bank_deposit_all(0_50_53_53_27,0);
+    ~grind_unicorn_horns;
+    ~bot_bank_deposit_all(0_50_53_53_27,1);
     ~bot_heal(0_50_53_53_27);
 }
 
@@ -36,21 +42,38 @@ if_close;
 
 
 [proc,hunt_unicorns]
-while(inv_freespace(inv) > 0){
-    def_coord $loot_coord = ~fight(black_unicorn);
+while(p_finduid(uid) = true & inv_freespace(inv) > 0){
+    def_coord $loot_coord = ~fight(black_unicorn,20,0_50_57_17_28);
     ~loot_unicorn($loot_coord);
-    equip_arrows;
 }
 
 
 
 [proc,loot_unicorn](coord $unicornCoord)
+world_delay(2);
+~botwalk($unicornCoord);
 obj_findallzone($unicornCoord);
-while(obj_findnext() = true & inv_freespace(inv) > 0){//////////////////////////////this can be improved
+while(p_finduid(uid) = true & obj_findnext() = true & inv_freespace(inv) > 0){//////////////////////////////this can be improved
     ~botwalk($unicornCoord);
     switch_obj(active_obj) {
-        case bones : ~bury;
+        case bones : ~bury(bones);
+
+        case bronze_arrow : ~pick_up(0);
+        case iron_arrow : ~pick_up(0);
+        case iron_knife : ~pick_up(0);
+
         case default : ~pick_up(1);
     }
     obj_findallzone($unicornCoord); 
+}
+equip_arrows;
+
+
+
+[proc,grind_unicorn_horns]
+def_int $slot = 1;
+while(p_finduid(uid) = true & inv_total(inv,unicorn_horn) > 0){
+    ~attempt_grind_ingredient(0, $slot);
+    world_delay(1);
+    $slot = calc($slot + 1);
 }

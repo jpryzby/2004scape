@@ -17,21 +17,12 @@ while(p_finduid(uid) = true){
 ~botrun(999,0,true);
 
 def_int $c = 0;
-while($c < 5){
-    ~botwalk(0_38_53_37_15);
-    ~bot_oploc(0_38_53_36_15, flax_ground, 2);
-
-    ~botwalk(0_38_53_37_14);
-    ~bot_oploc(0_38_53_37_13, flax_ground, 2);
-
-    ~botwalk(0_38_53_38_11);
-    ~bot_oploc(0_38_53_37_11, flax_ground, 2);
-
-    ~botwalk(0_38_53_38_11);
-    ~bot_oploc(0_38_53_39_11, flax_ground, 2);
-
-    ~botwalk(0_38_53_43_12);
-    ~bot_oploc(0_38_53_43_11, flax_ground, 2);
+while($c < 5 & p_finduid(uid) = true){
+    ~pick_flax(0_38_53_37_15,0_38_53_36_15);
+    ~pick_flax(0_38_53_37_14,0_38_53_37_13);
+    ~pick_flax(0_38_53_38_11,0_38_53_37_11);
+    ~pick_flax(0_38_53_38_11,0_38_53_39_11);
+    ~pick_flax(0_38_53_43_12,0_38_53_43_11);
 
     world_delay(1);
     $c = calc($c + 1);
@@ -41,14 +32,9 @@ while($c < 5){
 
 [proc,pick_last_three_flax]
 ~botrun(30,999,true);///////////////not working
-~botwalk(0_38_53_37_15);
-~bot_oploc(0_38_53_36_15, flax_ground, 2);
-
-~botwalk(0_38_53_37_14);
-~bot_oploc(0_38_53_37_13, flax_ground, 2);
-
-~botwalk(0_38_53_43_12);
-~bot_oploc(0_38_53_43_11, flax_ground, 2);
+~pick_flax(0_38_53_37_15,0_38_53_36_15);
+~pick_flax(0_38_53_37_14,0_38_53_37_13);
+~pick_flax(0_38_53_43_12,0_38_53_43_11);
 
 
 
@@ -63,7 +49,7 @@ world_delay(1);
 
 //spin flax
 def_int $count = 0;
-while($count < 28){
+while(inv_total(inv,flax) > 0 & p_finduid(uid) = true){
     def_struct $struct = oc_param(flax, crafting_spinning_struct);
     // check if we have the required level
     def_int $level = struct_param($struct, levelrequire);
@@ -103,8 +89,17 @@ if_close;
 ~bot_oploc(0_38_53_12_22, loc_1742, 1);
 
 ~botwalk(1_38_53_13_32);
-~bot_bank_deposit(1_38_53_12_32, 27);
+~bot_bank_deposit_all(1_38_53_12_32,0);
 
 //walk back to start
 ~botwalk(1_38_53_13_24);
 ~bot_oploc(1_38_53_13_23, loc_1744, 1);
+
+
+
+[proc,pick_flax](coord $walk_coord,coord $flax_coord)
+~botwalk($walk_coord);
+while(loc_find($flax_coord, flax_ground) = false){
+    world_delay(1);
+}
+~bot_oploc($flax_coord, flax_ground, 2);

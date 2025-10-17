@@ -105,8 +105,20 @@ if (%action_delay < map_clock) {
 }
 p_opobj(4);
 
+
+
+
+
 [proc,firemaking_success](coord $fire_coord, obj $log)
-obj_del;
+
+obj_findallzone($fire_coord);
+while(p_finduid(uid) = true & obj_findnext() = true){
+    mes("delete <obj_name>");
+    obj_del;
+    obj_findallzone($fire_coord); 
+}
+
+//obj_del;
 stat_advance(firemaking, oc_param($log, productexp));
 sound_synth(fire_lit, 0, 0);
 facesquare($fire_coord);
@@ -117,8 +129,8 @@ def_int $delay = calc(100 + random(100)); // firemaking length: https://archive.
 loc_add($fire_coord, loc_2732, 1, centrepiece_straight, $delay);
 
 // -2 to match osrs behavior. Potentially this is an engine problem with world_delay being too slow though
-world_delay(add($delay, -2));
-obj_addall($fire_coord, ashes, 1, 100);
+//world_delay(add($delay, -2));//////////////////////////jp
+//obj_addall($fire_coord, ashes, 1, 100);////////////////jp
 
 [proc,area_allow_loc_add](coord $coord)(boolean)
 if (map_locaddunsafe($coord) = true) {
