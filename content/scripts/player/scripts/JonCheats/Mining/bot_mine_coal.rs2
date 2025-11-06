@@ -1,0 +1,63 @@
+[debugproc,mine_coal]
+mes("Mining Coal in Falador");
+
+while(p_finduid(uid) = true){
+    ~walk_from_bank_to_coal;
+    ~mine_coal_rocks;
+    ~walk_from_coal_to_bank;
+    ~bot_bank_deposit_all(0_47_52_5_26,0);
+}
+
+
+
+
+[proc,walk_from_bank_to_coal]
+~botrun(0,999,true);
+~botwalk(0_47_52_13_11);
+~bot_oploc(0_47_52_12_11,loc_2113,1);
+world_delay(1);
+
+
+
+[proc,walk_from_coal_to_bank]
+~botwalk(0_47_152_13_11);
+~bot_oploc(0_47_152_12_11,loc_1755,1);
+world_delay(1);
+~botwalk(0_47_52_5_27);
+
+
+
+[proc,mine_coal_rocks]
+~bot_mine(0_47_152_20_11, 0_47_152_20_10,coalrock2);
+~bot_mine(0_47_152_20_9, 0_47_152_20_10,coalrock1);
+~bot_mine(0_47_152_23_11, 0_47_152_23_10,coalrock1);
+~bot_mine(0_47_152_24_9, 0_47_152_24_10,coalrock1);
+~bot_mine(0_47_152_24_13, 0_47_152_24_12,coalrock1);
+~bot_mine(0_47_152_26_11, 0_47_152_26_12,coalrock1);
+~bot_mine(0_47_152_27_14, 0_47_152_27_13,coalrock1);
+
+~bot_mine(0_47_152_29_11, 0_47_152_29_12,coalrock1);
+~bot_mine(0_47_152_31_13, 0_47_152_31_12,coalrock2);
+~bot_mine(0_47_152_31_10, 0_47_152_31_11,coalrock1);
+~bot_mine(0_47_152_34_11, 0_47_152_33_11,coalrock1);
+~bot_mine(0_47_152_35_14, 0_47_152_35_13,coalrock1);
+~bot_mine(0_47_152_37_12, 0_47_152_36_12,coalrock1);
+~bot_mine(0_47_152_36_9, 0_47_152_36_10,coalrock2);
+
+~botrun(100,0,false);
+
+~bot_mine(0_47_152_40_15,0_47_152_39_15,coalrock1);
+~bot_mine(0_47_152_41_12,0_47_152_40_12,coalrock1);
+~bot_mine(0_47_152_39_9, 0_47_152_38_9,coalrock1);
+~bot_mine(0_47_152_38_7, 0_47_152_38_8,coalrock1);
+~bot_mine(0_47_152_41_7, 0_47_152_40_7,coalrock2);
+~bot_mine(0_47_152_41_6, 0_47_152_40_6,coalrock1);
+~bot_mine(0_47_152_34_6, 0_47_152_35_6,coalrock2);
+
+~bot_mine(0_47_152_31_5, 0_47_152_32_5,coalrock1);
+~bot_mine(0_47_152_32_4, 0_47_152_32_5,coalrock1);
+~bot_mine(0_47_152_29_7, 0_47_152_29_6,coalrock1);
+~bot_mine(0_47_152_29_5, 0_47_152_29_6,coalrock1);
+~bot_mine(0_47_152_27_6, 0_47_152_28_6,coalrock1);
+~bot_mine(0_47_152_24_7, 0_47_152_24_6,coalrock1);
+~bot_mine(0_47_152_21_6, 0_47_152_21_7,coalrock2);

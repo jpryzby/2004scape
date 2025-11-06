@@ -677,7 +677,7 @@ if(p_finduid(uid) = true){
                 inv_del(inv, $clue, 1);
                 def_namedobj $casket = oc_param($clue, trail_casket);
                 inv_add(inv, $casket, 1);
-                ~trail_casket_obtained($casket);
+                //~trail_casket_obtained($casket);
                 return;
             }
         }
@@ -688,8 +688,8 @@ if(p_finduid(uid) = true){
 
 
 
-[proc,_trail_casket_easy] 
-~progress_clue_easy(last_item, "You've found another clue scroll!");
+[proc,_trail_casket_easy](obj $current_clue) 
+~progress_clue_easy($current_clue, "You've found another clue scroll!");
 
 
 

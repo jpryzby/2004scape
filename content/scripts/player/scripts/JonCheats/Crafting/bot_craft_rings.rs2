@@ -1,0 +1,65 @@
+[debugproc,make_all_rings]
+mes("Making all Rings");
+
+~make_rings(water_battlestaff,uncut_sapphire,sapphire, invis_ring1, sapphire_ring);
+~make_rings(air_battlestaff,uncut_emerald,emerald, invis_ring2, emerald_ring);
+~make_rings(fire_battlestaff,uncut_ruby,ruby, invis_ring3, ruby_ring);
+~make_rings(earth_battlestaff,uncut_diamond,diamond, invis_ring4, diamond_ring);
+
+
+[proc,make_rings](obj $staff,obj $uncut_gem, namedobj $gem, namedobj $invis_ring, namedobj $ring)
+~botwalk(0_46_52_1_41);
+~botwalk(0_46_52_1_40);
+~bot_bank_deposit_all(0_46_52_1_39,0);
+
+~unequip(^wearpos_rhand);
+~bot_bank_deposit_all(0_46_52_1_39,0);
+
+~bot_bank_withdraw(0_46_52_1_39,chisel,1);
+~bot_bank_withdraw(0_46_52_1_39,ring_mould,1);
+~bot_bank_withdraw(0_46_52_1_39,cosmicrune,^max_32bit_int);
+~bot_bank_withdraw(0_46_52_1_39,$staff,1);
+
+~try_equip(3);
+
+while(p_finduid(uid) = true & inv_total(bank,gold_ore) > 1 & inv_total(bank,$uncut_gem) > 1){
+    ~bot_bank_withdraw(0_46_52_1_39,gold_ore,12);
+    ~bot_bank_withdraw(0_46_52_1_39,$uncut_gem,12);
+
+    while(inv_total(inv,$uncut_gem) > 0 & inv_total(inv,gold_ore) > 0 & p_finduid(uid) = true){
+        ~crafting_gem($uncut_gem);
+        world_delay(1);
+        if_close;
+    }
+
+    ~botwalk(0_46_52_30_42);
+    facesquare(0_46_52_31_40);
+
+    while(inv_total(inv,gold_ore) > 0 & p_finduid(uid) = true){
+        ~bot_smithing_furnace(gold_ore);
+        if_close;
+    }
+
+    ~craft_jewelery($invis_ring,$ring,12,$gem);
+    if_close;
+
+    def_int $count = 3;
+    while($count < 15){
+        if($uncut_gem = uncut_sapphire){
+            ~magic_spell_enchant(^enchant_lvl1, $count);
+        }
+        else if($uncut_gem = uncut_emerald){
+            ~magic_spell_enchant(^enchant_lvl2, $count);
+        }
+        else if($uncut_gem = uncut_ruby){
+            ~magic_spell_enchant(^enchant_lvl3, $count);
+        }
+        else if($uncut_gem = uncut_diamond){
+            ~magic_spell_enchant(^enchant_lvl4, $count);
+        }
+        $count = calc($count + 1);
+    }
+
+    ~botwalk(0_46_52_1_40);
+    ~bot_bank_deposit_all(0_46_52_1_39,3);
+}

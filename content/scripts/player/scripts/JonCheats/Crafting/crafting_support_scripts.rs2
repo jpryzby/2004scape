@@ -50,7 +50,7 @@ if(p_finduid(uid) = true){
 
 
 
-[proc,craft_jewelery](namedobj $jewelry_obj,namedobj $product,int $count)
+[proc,craft_jewelery](namedobj $jewelry_obj,namedobj $product,int $count, namedobj $gem)
 //def_namedobj $jewelry_obj = unstrung_gold_amulet;
 
 if(p_finduid(uid) = true){
@@ -74,17 +74,8 @@ if(p_finduid(uid) = true){
         ~macro_event_general_spawn(~macro_event_set_random);
         return;
     }
-    def_namedobj $gem = ruby;
-    // ****** FOR WEAKQUEUE *******
-    // // make sure the player doesnt produce more than they can
-    // // the gem_total is only 0 when the player selects gold crafting
-    // def_int $gem_total = inv_total(inv,  struct_param($struct, gem));
-    // if ($gem_total = 0) {
-    //     $count = min($count, inv_total(inv, gold_bar));
-    // } else {
-    //     $count = min(min($count, inv_total(inv, gold_bar)), $gem_total);
-    // }
-    // ****** FOR WEAKQUEUE *******
+    
+
     
     def_int $productexp = struct_param($struct, productexp);
 
@@ -98,5 +89,5 @@ if(p_finduid(uid) = true){
     // weakqueue(crafting_gold, 1, $productexp, $gem, $jewelry_obj, $count);
     //----------------------
 }
-world_delay(1);
+//world_delay(1);
 if_close;

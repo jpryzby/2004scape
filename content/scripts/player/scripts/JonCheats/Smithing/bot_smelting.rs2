@@ -1,9 +1,9 @@
-[debugproc,smelt]
-mes("Smelting");
+[debugproc,smelt_iron]
+mes("Smelting Iron");
 
 
 
-def_obj $ore = gold_ore;
+def_obj $ore = iron_ore;
 while(p_finduid(uid) = true & inv_total(bank,$ore) > 1){
  
 

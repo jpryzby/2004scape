@@ -1,5 +1,5 @@
 [proc,make_ring_of_forging]
-mes("Making Rings of Forging");
+mes("Making Riongs of Forging");
 ~botwalk(0_46_52_1_41);
 ~botwalk(0_46_52_1_40);
 ~bot_bank_deposit_all(0_46_52_1_39,0);
@@ -30,7 +30,7 @@ while(p_finduid(uid) = true & inv_total(bank,gold_ore) > 1 & inv_total(bank,uncu
         ~bot_smithing_furnace(gold_ore);
     }
 
-    ~craft_jewelery(invis_ring3,ruby_ring,12);
+    ~craft_jewelery(invis_ring3,ruby_ring,12,ruby);
 
     def_int $count = 3;
     while($count < 15){

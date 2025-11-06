@@ -109,7 +109,8 @@ if($cowCoord = 0_0_0_0_0 | $cowCoord = null){
 obj_findallzone($cowCoord);
 while(obj_findnext() = true & inv_freespace(inv) > 0){
     switch_obj(active_obj) {
-        case bones : ~bury(bones);
+        //case bones : ~bury(bones);
+        case bones : ~destroy;
         
         case raw_beef : ~destroy;
         case cow_hide : ~pick_up(1);

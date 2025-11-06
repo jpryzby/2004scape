@@ -1,0 +1,69 @@
+[debugproc,make_cannonballs]
+mes("Making Cannonballs");
+
+~botwalk(0_46_52_1_40);
+~bot_bank_deposit_all(0_46_52_1_39,0);
+~bot_bank_withdraw(0_46_52_1_39,ammo_mould,1);
+
+
+while(p_finduid(uid) = true & inv_total(bank,iron_ore) > 1 & inv_total(bank,coal) > 2){
+    ~bot_bank_withdraw(0_46_52_1_39,iron_ore,9);
+    ~bot_bank_withdraw(0_46_52_1_39,coal,18);
+
+    ~botwalk(0_46_52_30_42);
+    facesquare(0_46_52_31_40);
+
+    while(inv_total(inv,iron_ore) > 0 & inv_total(inv,coal) > 1 & p_finduid(uid) = true){
+        ~bot_smithing_furnace(coal);
+        //world_delay(1);
+        ~smelt_cannonballs;
+        //world_delay(4);
+    }
+
+    ~botwalk(0_46_52_1_40);
+    ~bot_bank_deposit_all(0_46_52_1_39,1);
+}
+
+
+
+
+[proc,smelt_cannonballs]
+if(p_finduid(uid) = true){
+    if(map_members = ^false) {
+        mes("You need to be on a members' world to make cannonballs."); // OSRS
+        return;
+    }
+    if (stat(smithing) < 35) {
+        mes("You need a Smithing level of 35 to make cannonballs."); // osrs
+        return;
+    }
+    if (inv_total(inv, ammo_mould) < 1) {
+        mes("You need a cannonball mould to make cannonballs."); // osrs
+        return;
+    }
+    if (inv_total(inv, steel_bar) < 1) {
+        mes("You need a steel bar to make cannonballs."); // should never happen
+        return;
+    }
+    if (afk_event = ^true) {
+        ~macro_event_general_spawn(~macro_event_set_random); // guess
+        return;
+    }
+    mes("You heat the steel bar into a liquid state.");
+    anim(human_furnace, 0);
+    sound_synth(furnace, 0, 0);
+    p_delay(4); // this delay is 2t faster in osrs, furnace anim overides pickupfloor if this delay is too fast
+    mes("You pour the molten metal into your cannonball mould.");
+    anim(human_pickupfloor, 0);
+    p_delay(0);
+    mes("The molten metal cools slowly to form 4 cannonballs.");
+    p_delay(2);
+    anim(human_pickupfloor, 0);
+    mes("You remove the cannonballs from the mould.");
+    inv_del(inv, steel_bar, 1);
+    inv_add(inv, mcannonball, 4);
+    // 37.5 xp gained
+    // https://web.archive.org/web/20040606145237/http://www.tip.it/runescape/index.php?page=rs2smithtables.htm
+    // https://web.archive.org/web/20041222084000/http://www.runehq.com/cacheguides/viewotherguide00278.htm
+    stat_advance(smithing, 375);
+}

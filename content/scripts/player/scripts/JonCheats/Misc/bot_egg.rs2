@@ -1,8 +1,367 @@
 [debugproc,egg]
 mes("Eggy Test");
 
-//~buy_varrok; 
+//~buy_varrock; 
 //~clue_scroll_easy;
+//~solve_clue_easy;
+//~hunt_giants;
+
+~cannon_train;
+
+
+
+[proc,cannon_train]
+mes("Cannon Train in Khazard Battlefield");
+
+def_coord $saftey_spot = 0_39_50_29_43;
+
+while(p_finduid(uid) = true){
+    def_int $end_time = calc(map_clock + 2400);
+
+    ~walk_from_bank_to_cannon;
+    ~set_up_cannon;
+
+    while(p_finduid(uid) = true & map_clock < $end_time & stat(hitpoints) > 20 & loc_find(%mcannon_coord,dwarf_multicannon1) = true & %mcannon_ammo > 0){
+        //~fight_gnomes_and_khazards;
+        ~loot_bones(0_39_50_29_43);
+        ~loot_bones(0_39_50_29_51);
+        ~loot_bones(0_39_50_37_43);
+        ~loot_bones(0_39_50_37_51);
+        if(coord ! $saftey_spot){
+            ~walk_to_safe_spot($saftey_spot);
+        }
+        world_delay(5);
+    }
+    ~pick_up_cannon;
+    ~walk_from_cannon_to_bank;
+    ~bot_heal(0_41_51_32_19);
+}
+
+
+
+[proc,set_up_cannon]
+def_coord $cannon_spot = 0_39_50_30_40;
+if(inv_total(inv,twpart1) > 0 & inv_total(inv,twpart2) > 0 & inv_total(inv,twpart3) > 0 & inv_total(inv,twpart4) > 0 & p_finduid(uid) = true){
+    inv_del(inv,twpart1,1);
+    inv_del(inv,twpart2,1);
+    inv_del(inv,twpart3,1);
+    inv_del(inv,twpart4,1);
+    
+    loc_add($cannon_spot, dwarf_multicannon1, 0, centrepiece_straight, ^cannon_decay_length);
+    %mcannon_coord = $cannon_spot;
+
+    ~load_cannon;
+    world_delay(5);
+}
+
+
+
+[proc,load_cannon]
+if (%mcannon_ammo >= 30) {
+    mes("The cannon is already full of ammo."); // osrs
+    return;
+}
+def_int $count = min(sub(30, max(%mcannon_ammo, 0)), inv_total(inv, mcannonball));
+// with one cannon ball, it'd still be plural: https://youtu.be/5itKFWuomiM&t=132
+mes("You load the cannon with <tostring($count)> cannonballs."); // https://youtu.be/TeQXQDaawO0?t=239
+%mcannon_ammo = add(%mcannon_ammo, $count);
+inv_del(inv, mcannonball, $count);
+
+
+
+[proc,fight_gnomes_and_khazards]
+if(npc_find(coord, khazard_troop, 4, 0) = true){
+    if(p_finduid(uid) = true){
+        p_opnpc(2);
+    }
+}
+else if(npc_find(coord, khazard_troop_spearmen, 4, 0) = true){
+    if(p_finduid(uid) = true){
+        p_opnpc(2);
+    }
+}
+else if(npc_find(coord, terrorbird_mounted, 4, 0) = true){
+    if(p_finduid(uid) = true){
+        p_opnpc(2);
+    }
+}
+else if(npc_find(coord, terrorbird_mountedspear, 4, 0) = true){
+    if(p_finduid(uid) = true){
+        p_opnpc(2);
+    }
+}
+
+world_delay(5);
+if_close;
+
+
+
+[proc,pick_up_cannon]
+while(%mcannon_ammo > 0){
+    world_delay(1);
+}
+world_delay(1);
+~bot_oploc(%mcannon_coord,dwarf_multicannon1,2);
+world_delay(3);
+
+
+
+[proc,loot_bones](coord $coord)
+~load_cannon;
+~fire_cannon;
+obj_findallzone($coord);
+while(p_finduid(uid) = true & obj_findnext() = true & inv_freespace(inv) > 0){//////////////////////////////this can be improved
+    switch_obj(active_obj) {
+        case bones : ~bury(bones);
+
+        case bronze_arrow : ~pick_up(0);
+        case iron_arrow : ~pick_up(0);
+        case iron_knife : ~pick_up(0);
+
+        case default : ~pick_up(1);
+    }
+    obj_findallzone($coord); 
+}
+equip_arrows;
+
+
+
+[proc,walk_from_bank_to_cannon]
+~botwalk(0_40_51_59_33);
+~botwalk(0_40_51_31_21);
+~botwalk(0_39_50_54_54);
+~botwalk(0_39_50_29_43);
+
+
+
+[proc,walk_from_cannon_to_bank]
+~botwalk(0_39_50_54_54);
+~botwalk(0_40_51_31_21);
+~botwalk(0_40_51_59_33);
+~botwalk(0_41_51_31_19);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[proc,hunt_giants]
+while(p_finduid(uid) = true){
+    ~walk_from_bank_to_giants;
+    ~hunt_giant;
+    ~walk_from_giants_to_bank;
+    ~bot_heal(0_49_53_50_44);
+}
+
+
+
+
+[proc,hunt_giant]
+while(p_finduid(uid) = true & inv_freespace(inv) > 0 & stat(hitpoints) > 25){
+    def_coord $loot_coord = ~fight(giant,20,0_48_153_45_52);
+    ~loot_giant($loot_coord);
+}
+
+
+
+
+[proc,loot_giant](coord $loot_coord)
+world_delay(2);
+~botwalk($loot_coord);
+obj_findallzone($loot_coord);
+while(p_finduid(uid) = true & obj_findnext() = true & inv_freespace(inv) > 0){
+    ~botwalk($loot_coord);
+    switch_obj(active_obj) {
+        case big_bones : ~pick_up(1);
+
+        case bones : ~destroy;
+        case coins : ~destroy;
+        case beer : ~destroy;
+        case waterrune : ~destroy;
+        case firerune : ~destroy;
+        case mindrune : ~destroy;
+        case chaosrune : ~destroy;
+        case deathrune : ~destroy;
+        case naturerune : ~destroy;
+        case iron_full_helm : ~destroy;
+        case iron_kiteshield : ~destroy;
+        case iron_dagger : ~destroy;
+        case steel_longsword : ~destroy;
+        case uncut_sapphire : ~destroy;
+        case uncut_emerald : ~destroy;
+        case body_talisman : ~destroy;
+
+        case unidentified_guam : ~destroy;            //Attack Potion 3
+        case unidentified_marrentill : ~destroy;      //Antipoison 5
+        case unidentified_tarromin : ~destroy;        //Strength Potion 12
+        case unidentified_harralander : ~destroy;     //Restore Potion 22         //Energy Potion 26
+        case unidentified_irit : ~pick_up(1);         //Super Attack Potion 45    //Super antipoison
+        case unidentified_ranarr : ~pick_up(1);       //Prayer Potion 38          //Defense Potion 30
+        case unidentified_avantoe : ~pick_up(1);      //Fishing Potion 50
+        case unidentified_kwuarm : ~pick_up(1);       //Super Strength Potion 55  //Weapon Poison 60
+        case unidentified_cadantine : ~pick_up(1);    //Super Defense Potion 66
+        case unidentified_lantadyme : ~pick_up(1);    //Antifire Potion 69
+        case unidentified_dwarf_weed : ~pick_up(1);   //Ranging Potion 72
+
+        case bronze_arrow : ~pick_up(0);
+        case iron_arrow : ~pick_up(0);
+        case iron_knife : ~pick_up(0);
+
+        case default : ~pick_up(1);
+    }
+    obj_findallzone($loot_coord); 
+}
+equip_arrows;
+
+
+
+[proc,walk_from_bank_to_giants]
+~botwalk(0_49_53_38_39);
+~botwalk(0_49_53_3_37);
+~botwalk(0_48_53_43_57);
+~open_edgeville_dungeon_door;
+~botwalk(0_48_53_43_60);
+~bot_oploc(0_48_53_44_60,loc_1754,1);
+~botwalk(0_48_153_45_52);
+
+
+
+[proc,walk_from_giants_to_bank]
+~botwalk(0_48_153_43_60);
+~bot_oploc(0_48_153_44_60,loc_1755,1);
+world_delay(1);
+~botwalk(0_48_53_43_58);
+~open_edgeville_dungeon_door;
+
+~botwalk(0_49_53_3_37);
+~botwalk(0_49_53_38_39);
+~botwalk(0_49_53_49_44);
+
+~bot_bank_deposit_all(0_49_53_50_44,1);
+
+
+
+[proc,open_edgeville_dungeon_door]
+if (inv_total(inv, edgevilledungeonkey) > 0 & p_finduid(uid) = true) {
+    mes("You unlock the door.");
+    sound_synth(locked, 0, 0);
+    def_coord $loc_coord = 0_48_53_43_58;
+    //def_int $angle = loc_angle;
+    //def_locshape $shape = loc_shape;
+    //def_loc $replacement = loc_param(next_loc_stage);
+    //def_int $x;
+    //def_int $z;
+    //$x, $z = ~door_open($angle, loc_shape);
+
+    // walk through door, but if entering, walk next to door and then through
+    //def_boolean $entering = ~check_axis(coord,  $loc_coord, $angle);
+    def_boolean $entering;
+
+    if(coordz(coord) < 3450){
+        $entering = true;
+    }else{
+        $entering = false;
+    }
+
+    def_coord $dest = $loc_coord;
+    if ($entering = true) {
+        if (coord ! $loc_coord) {
+            p_delay(0);
+            //p_teleport($loc_coord);
+            sound_synth(door_open, 0, 0);
+            p_delay(1);
+            //$dest = movecoord($loc_coord, 0, 0, 1);
+        } else {
+            p_delay(0);
+            sound_synth(door_open, 0, 0);
+            //$dest = movecoord($loc_coord, 0, 0, 1);
+        }
+        
+    } else {
+        p_delay(0);
+        sound_synth(door_open, 0, 0);
+        $dest = movecoord($loc_coord, 0, 0, -1);
+    }
+
+    p_teleport($dest);
+
+    // Temp note: dur updated
+    //loc_add($loc_coord, inviswall, $angle, $shape, 3);
+    //loc_add(movecoord($loc_coord, $x, 0, $z), $replacement, modulo(add($angle, 1), 4), $shape, 3);
+} else {
+    mes("The door is locked.");
+}
+
+
+
+[proc,fire_cannon]
+if (~cannon_belongs_to_player = false) {
+    mes("That isn't your cannon!"); // https://youtu.be/aJDlEmyPpk8?t=140
+    return;
+}
+if (gettimer(cannon_rotate) > 0) {
+    mes("Your cannon is already firing."); // https://youtu.be/WWyNTsMXjTE?t=122
+    return;
+}
+if (%mcannon_ammo < 1) {
+    // current osrs reloads, but thats wrong for our version
+    // https://oldschool.runescape.wiki/w/Update:Happy_Birthday!:
+    // - "Left-clicking on your cannon will now let you reload it, even if it isn't currently firing."
+    mes("Your cannon is out of ammo!"); // https://youtu.be/TeQXQDaawO0?t=239
+    return;
+}
+settimer(cannon_rotate, 1, 0);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[debugproc,bulk_sell]
+~botwalk(0_46_52_13_60);
+
+if(npc_find(coord, generalassistant4, 8, ^vis_off) = true & p_finduid(uid) = true){
+    p_opnpc(3);
+
+    while(p_finduid(uid) = true & inv_total(inv,cert_coif) > 0){
+        ~sell_item(cert_coif, 10);
+        world_delay(1);
+    }
+}
+
 
 
 

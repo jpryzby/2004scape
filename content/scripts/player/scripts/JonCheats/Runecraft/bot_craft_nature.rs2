@@ -107,35 +107,3 @@ while(p_finduid(uid) = true & $i < $amount) {
     $i = calc($i + 1);
 }
 wealth_event(^wealth_shop_buy, oc_debugname($obj), $i, $total_cost);
-
-// Sell an item to the shop
-[proc,sell_item](obj $obj, int $amount)
-def_int $shop_total = inv_total(%shop, oc_uncert($obj));
-def_int $total_value = 0;
-def_int $sell_amount = ~calculate_items_amount_sold($obj, $amount);
-if(~can_sell_obj($obj) = false) {
-    return;
-}
-// Check if you will have space in your inventory to hold the coins after selling
-if(inv_itemspace(inv, coins, $sell_amount, inv_size(inv)) = false & oc_stackable($obj) = true & inv_total(inv, $obj) > $sell_amount) {
-    mes("You don't have enough inventory space.");
-    return;
-}
-// Check if the shop will have enough space to hold the obj
-if(inv_itemspace(%shop, oc_uncert($obj), $sell_amount, inv_size(%shop)) = false) {
-    mes("The shop has run out of space.");
-    return;
-}
-// Iteration to calc the total value of the sale
-def_int $i = 0;
-while(p_finduid(uid) = true & $i < $sell_amount) {
-    def_int $added_amt = ~adjusted_item_cost_selling(oc_uncert($obj), calc($shop_total + $i));
-    $total_value = calc($total_value + $added_amt);
-    $i = calc($i + 1);
-}
-// now perform the transaction 
-inv_moveitem_uncert(inv, %shop, $obj, $sell_amount);
-wealth_event(^wealth_shop_sell, oc_debugname($obj), $sell_amount, $total_value);
-if($total_value > 0) {
-    inv_add(inv, coins, $total_value);
-}

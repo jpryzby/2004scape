@@ -1,0 +1,80 @@
+[proc,activate_prayer_protectfrommelee]
+p_clearpendingaction;
+def_dbrow $data = ~get_prayer_data(^prayer_protectfrommelee);
+if ($data = null) {
+    return;
+}
+if (%prayer_protectfrommelee = ^true) {
+    %prayer_protectfrommelee = ^false;
+    ~prayer_deactivate(^prayer_protectfrommelee);
+    return;
+}
+if (~prayer_checks($data) = false) {
+    %prayer_protectfrommelee = ^false;
+    return;
+}
+def_int $levelreq = db_getfield($data, prayers:level, 0);
+if (stat_base(prayer) < $levelreq){
+    %prayer_protectfrommelee = ^false;
+    sound_synth(prayer_off, 0, 0);
+    ~mesbox("You need a @dbl@Prayer level of <tostring($levelreq)> to use <db_getfield($data, prayers:name, 0)>.");
+    return;
+}
+%prayer_protectfrommelee = ^true;
+~prayer_activate($data);
+
+
+
+
+[proc,activate_prayer_protectfrommagic]
+p_clearpendingaction;
+def_dbrow $data = ~get_prayer_data(^prayer_protectfrommagic);
+if ($data = null) {
+    return;
+}
+if (%prayer_protectfrommagic = ^true) {
+    %prayer_protectfrommagic = ^false;
+    ~prayer_deactivate(^prayer_protectfrommagic);
+    return;
+}
+if (~prayer_checks($data) = false) {
+    %prayer_protectfrommagic = ^false;
+    return;
+}
+def_int $levelreq = db_getfield($data, prayers:level, 0);
+if (stat_base(prayer) < $levelreq){
+    %prayer_protectfrommagic = ^false;
+    sound_synth(prayer_off, 0, 0);
+    ~mesbox("You need a @dbl@Prayer level of <tostring($levelreq)> to use <db_getfield($data, prayers:name, 0)>.");
+    return;
+}
+%prayer_protectfrommagic = ^true;
+~prayer_activate($data);
+
+
+
+
+[proc,activate_prayer_protectfrommissiles]
+p_clearpendingaction;
+def_dbrow $data = ~get_prayer_data(^prayer_protectfrommissiles);
+if ($data = null) {
+    return;
+}
+if (%prayer_protectfrommissiles = ^true) {
+    %prayer_protectfrommissiles = ^false;
+    ~prayer_deactivate(^prayer_protectfrommissiles);
+    return;
+}
+if (~prayer_checks($data) = false) {
+    %prayer_protectfrommissiles = ^false;
+    return;
+}
+def_int $levelreq = db_getfield($data, prayers:level, 0);
+if (stat_base(prayer) < $levelreq){
+    %prayer_protectfrommissiles = ^false;
+    sound_synth(prayer_off, 0, 0);
+    ~mesbox("You need a @dbl@Prayer level of <tostring($levelreq)> to use <db_getfield($data, prayers:name, 0)>.");
+    return;
+}
+%prayer_protectfrommissiles = ^true;
+~prayer_activate($data);

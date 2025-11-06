@@ -5,7 +5,7 @@ mes("Hunting Fire Giants");
 while(p_finduid(uid) = true){
     ~walk_from_bank_to_fire_giant;
 
-    while(p_finduid(uid) = true & inv_freespace(inv) > 0){
+    while(p_finduid(uid) = true & inv_freespace(inv) > 0 & stat(hitpoints) > 25){
         def_coord $loot_coord = ~fight_fire_giant;
         ~loot_fire_giant($loot_coord);
         world_delay(1);
@@ -13,6 +13,7 @@ while(p_finduid(uid) = true){
     ~deposit_firegiant;
     ~bot_heal(0_41_51_32_19);
 }
+
 
 
 
@@ -43,31 +44,31 @@ while(p_finduid(uid) = true){
 ~botwalk(0_39_54_59_4);
 ~botwalk(0_39_54_36_22);
 ~botwalk(0_39_54_32_39);
-//~bot_oploc();
+~bot_oploc(0_39_54_32_39,loc_1551,1);
 
 ~botwalk(0_39_54_17_39);
-//~bot_oploc();
+~bot_oploc(0_39_54_17_39,loc_1553,1);
 
-~botwalk(0_39_54_14_38);
-//~bot_oploc();
+~botwalk(0_39_54_14_37);
+~bot_oploc(0_39_54_13_37,loc_1987,1);
 world_delay(5);
 
 
 ~botwalk(0_39_54_16_20);
-//Rope to rock
-world_delay(10);
+~bot_oploc_rope_rock;
 
-~botwalk(0_39_54_17_10);
-//Rope to dead tree
-world_delay(10);
+~botwalk(0_39_54_16_10);
+~bot_oploc_rope_tree;
 
 //open ledge
-//~bot_oploc();
+~bot_oploc(0_39_54_15_8,loc_2010,1);
+world_delay(2);
 
 ~botwalk(0_40_154_5_25);
-//~bot_oploc();
+~bot_oploc(0_40_154_5_25,loc_1519,1);
 
 ~botwalk(0_40_154_8_37);
+world_delay(10);
 
 
 ////////// Fight Fire Giants //////////
@@ -76,23 +77,32 @@ world_delay(10);
 def_coord $safe_spot1 = 0_40_154_8_36;
 def_coord $safe_spot2 = 0_40_154_8_37;
 def_coord $active_safe_spot = $safe_spot1;
+if(add(%lastcombat, 8) >= map_clock){
+    $active_safe_spot = $safe_spot2;
+}
 
-
-~botwalk($active_safe_spot);
+~walk_to_safe_spot($active_safe_spot);
 
 if(npc_find(0_40_154_6_34, firegiant, 5, 0) = true){
 
     p_opnpc(2);
-
+    if(coord ! $active_safe_spot){
+        ~walk_to_safe_spot($active_safe_spot);
+        world_delay(8);
+        p_opnpc(2);
+    }
 
     // While in combat
-    while(p_finduid(uid) = true & npc_stat(hitpoints) > 0){
+    while(p_finduid(uid) = true & npc_stat(hitpoints) > 0 & stat(hitpoints) > 25){
         ~walk_to_safe_spot($active_safe_spot);
-        if(add(%lastcombat, 10) >= map_clock){
+        p_opnpc(2);
+        world_delay(8);
+        if(add(%lastcombat, 8) >= map_clock){
             $active_safe_spot = $safe_spot2;
+            return(null);
         }
 
-        p_opnpc(2);
+        
         if_close;
 
         world_delay(1);
@@ -109,6 +119,9 @@ if(npc_find(0_40_154_6_34, firegiant, 5, 0) = true){
 
 ////////// Loot //////////
 [proc,loot_fire_giant](coord $giantCoord)
+if($giantCoord = null){
+    return;
+}
 world_delay(2);
 ~botwalk($giantCoord);
 obj_findallzone($giantCoord);
@@ -123,6 +136,7 @@ while(p_finduid(uid) = true & obj_findnext() = true & inv_freespace(inv) > 0){
         case lobster : ~destroy;
         case steel_bar : ~destroy;
         case steel_axe : ~destroy;
+        case mithril_sq_shield : ~destroy;
         case 2dose1strength : ~destroy;
         case unidentified_guam : ~destroy;
         case unidentified_marrentill : ~destroy;
@@ -144,3 +158,49 @@ equip_arrows;
 ~magic_teleport(^ardougne_teleport);
 ~botwalk(0_41_51_31_19);
 ~bot_bank_deposit_all(0_41_51_32_19,3);
+
+
+
+
+
+
+
+[proc,bot_oploc_rope_rock]
+if(coordz(coord) <= coordz(0_39_54_16_12)) {
+    mes("You don't see that being any help.");
+    return;
+}
+if(inzone(0_39_54_14_20, 0_39_54_18_25, coord) = false) {
+    mes("You can't get a good shot from here.");
+    return;
+}
+def_coord $rock_coord = 0_39_54_16_12;
+~forcewalk2(movecoord($rock_coord, 0, 0, 8));
+anim(human_throwrope, 0);
+spotanim_map(rope_piece, movecoord($rock_coord, 0, 0, 6), 0, 20);
+p_delay(1);
+// Temp note: dur updated
+//loc_change(loc_1997, 8);
+def_int $i = 1;
+while($i < 8) {
+    // Temp note: dur updated
+    //loc_add(movecoord($rock_coord, 0, 0, $i), loc_1998, loc_angle, loc_shape, calc(9 - $i));
+    $i = calc($i + 1);
+}
+~agility_force_move(0, human_wading, movecoord($rock_coord, 0, 0, 1));
+~agility_force_move(0, human_wading, movecoord($rock_coord, 1, 0, 0));
+p_delay(1);
+
+
+
+[proc,bot_oploc_rope_tree]
+if(p_finduid(uid) = true){
+    mes("You tie the rope to the tree");
+    p_delay(1);
+    mes("and let your self down on to the ledge.");
+    p_teleport(0_39_54_15_7);
+}
+
+
+
+

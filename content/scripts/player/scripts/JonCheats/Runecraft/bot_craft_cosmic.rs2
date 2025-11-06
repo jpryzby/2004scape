@@ -1,0 +1,75 @@
+[debugproc,craft_cosmic]
+mes("craft cosmic rune");
+
+while(p_finduid(uid) = true & inv_getobj(inv, 27) ! air_talisman){
+    ~walk_to_cosmic_alter;
+    ~craft_cosmic_rune;
+    ~bank_cosmic_rune;
+}
+
+
+
+
+
+
+
+
+[proc,walk_to_cosmic_alter]
+//Turn on Run
+~botrun(75,999,true);
+
+~botwalk(0_49_149_41_25);
+~botwalk(0_49_149_51_2);
+~botwalk(0_49_148_28_56);
+~botwalk(0_49_148_13_49);
+~botwalk(0_49_148_39_27);
+
+
+
+
+[proc,craft_cosmic_rune]
+//enter the temple
+facesquare(0_49_148_38_25);
+if(p_finduid(uid) = true){
+    anim(human_pickupfloor, 0);
+    sound_synth(teleport_all, 0, 0);
+    mes("You hold the Cosmic talisman towards the mysterious ruins.");
+    mes("You feel a powerful force take hold of you...");
+    if(p_finduid(uid) = true){
+        p_delay(1);
+        p_telejump(0_33_75_30_53);
+    }
+}
+
+//walk to the alter
+~botwalk(0_33_75_30_35);
+
+//craft the runes
+~bot_oploc(0_33_75_29_32,rc_cosmic_altar,1);
+
+
+
+
+[proc,bank_cosmic_rune]
+mes("walk to exit portal");
+//walk to exit portal
+~botwalk(0_33_75_30_53);
+
+//tele out
+~bot_oploc(0_33_75_30_54,rc_cosmic_altar_exit_portal,1);
+
+//walk back to bank
+~botwalk(0_49_148_13_49);
+~botwalk(0_49_148_28_56);
+~botwalk(0_49_149_51_2);
+~botwalk(0_49_149_41_25);
+~botwalk(0_49_149_16_42);
+
+if(npc_find(coord, fairy_banker, 20, 0) = true) {
+    p_opnpc(1);
+    world_delay(3);
+    if_close;
+    ~openbank;
+    ~bank_deposit_request(inv, cosmicrune, ^max_32bit_int, 1);
+    ~bank_withdraw_request(inv, blankrune, 27, 1);
+}

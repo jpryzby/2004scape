@@ -1,7 +1,7 @@
 
 
 [debugproc,buy_arrow]
-mes("Buying Arrows in Varrok");
+mes("Buying Arrows in Varrock");
 ~bot_open_shop(0_50_53_33_33, lowe);
 while(p_finduid(uid) = true & inv_total(inv,coins) > 1000){
     ~buy_stackable_item(archeryshop, 0, 1910, bronze_arrow);
@@ -116,7 +116,7 @@ while(inv_total(inv, coins) > 100 & p_finduid(uid) = true){
 
 
 [debugproc,buy_runes]
-mes("Buying Runes in Varrok");
+mes("Buying Runes in Varrock");
 ~botwalk(0_50_53_53_9);
 
 if(npc_find(coord, aubury, 8, ^vis_off) = true & p_finduid(uid) = true){
@@ -196,20 +196,7 @@ if(npc_find(coord, magearena_runeshop, 8, ^vis_off) = true & p_finduid(uid) = tr
 
 
 
-[proc,bot_open_shop](coord $shop_location, npc $shop_npc)
-~botwalk($shop_location);
-if(npc_find(coord, $shop_npc, 8, ^vis_off) = true & p_finduid(uid) = true){
-    mes("Found NPC");
-    p_opnpc(3);
-}
 
-
-
-[proc,buy_stackable_item](inv $shop_inv, int $item_slot, int $buy_down_number, obj $buying_item)
-while(p_finduid(uid) = true & inv_total(inv, coins) > 1000 & inv_getnum($shop_inv, $item_slot) > $buy_down_number){
-    ~buy_item($buying_item, 5);
-    world_delay(1);
-}
 
 
 
@@ -305,31 +292,91 @@ console("done looping");
 
 
 
-[proc,buy_varrok]
-mes("Buying from the shops in Varrok");
-while(inv_total(inv,coins) > 100){
+[proc,sell_item](obj $obj, int $amount)
+def_int $shop_total = inv_total(%shop, oc_uncert($obj));
+def_int $total_value = 0;
+def_int $sell_amount = ~calculate_items_amount_sold($obj, $amount);
+if(~can_sell_obj($obj) = false) {
+    return;
+}
+// Check if you will have space in your inventory to hold the coins after selling
+if(inv_itemspace(inv, coins, $sell_amount, inv_size(inv)) = false & oc_stackable($obj) = true & inv_total(inv, $obj) > $sell_amount) {
+    mes("You don't have enough inventory space.");
+    return;
+}
+// Check if the shop will have enough space to hold the obj
+if(inv_itemspace(%shop, oc_uncert($obj), $sell_amount, inv_size(%shop)) = false) {
+    mes("The shop has run out of space.");
+    return;
+}
+// Iteration to calc the total value of the sale
+def_int $i = 0;
+while($i < $sell_amount) {
+    def_int $added_amt = ~adjusted_item_cost_selling(oc_uncert($obj), calc($shop_total + $i));
+    $total_value = calc($total_value + $added_amt);
+    $i = calc($i + 1);
+}
+// now perform the transaction 
+inv_moveitem_uncert(inv, %shop, $obj, $sell_amount);
+wealth_event(^wealth_shop_sell, oc_debugname($obj), $sell_amount, $total_value);
+if($total_value > 0) {
+    inv_add(inv, coins, $total_value);
+}
+
+
+
+[debugproc,buy_varrock]
+mes("Buying from the shops in Varrock");
+while(inv_total(inv,coins) > 1000){
+    mes("walking to archery shop");
     ~bot_open_shop(0_50_53_33_33, lowe);
+    mes("buying from archery shop");
     while(inv_getnum(archeryshop, 0) > 1910 & inv_getnum(archeryshop, 1) > 1475 & p_finduid(uid) = true & inv_total(inv,coins) > 1000){
+        mes("Buying Bronze Arrows");
         ~buy_stackable_item(archeryshop, 0, 1910, bronze_arrow);
+        mes("Buying Iron Arrows");
         ~buy_stackable_item(archeryshop, 1, 1475, iron_arrow);
         world_delay(1);
     }
     if_close;
+    mes("Exiting Archery Shop");
 
-
+    mes("Walking to Magic Shop");
     ~bot_open_shop(0_50_53_53_9, aubury);
+    mes("Buying from magic shop");
     while(inv_getnum(runeshop, 0) > 1980 & inv_getnum(runeshop, 1) > 1980 & inv_getnum(runeshop, 2) > 1980 & inv_getnum(runeshop, 3) > 1980 & inv_getnum(runeshop, 4) > 975 & inv_total(inv, coins) > 1000 & p_finduid(uid) = true){
         ~buy_stackable_item(runeshop, 0, 1980, firerune);
+        mes("Buying fire Rune");
         ~buy_stackable_item(runeshop, 1, 1980, waterrune);
+        mes("Buying air Rune");
         ~buy_stackable_item(runeshop, 2, 1980, airrune);
+        mes("Buying earth Rune");
         ~buy_stackable_item(runeshop, 3, 1980, earthrune);
+        mes("Buying mind Rune");
         ~buy_stackable_item(runeshop, 4, 975, mindrune);
+        mes("Buying chaos Rune");
         ~buy_stackable_item(runeshop, 6, 499, chaosrune);
+        mes("Buying death Rune");
         ~buy_stackable_item(runeshop, 7, 499, deathrune);
 
         world_delay(1);
     }
+    mes("Exiting Magic Shop");
     world_delay(1);
     if_close;
 }
 
+[proc,bot_open_shop](coord $shop_location, npc $shop_npc)
+~botwalk($shop_location);
+if(npc_find(coord, $shop_npc, 8, ^vis_off) = true & p_finduid(uid) = true){
+    mes("Found NPC");
+    p_opnpc(3);
+}
+
+
+
+[proc,buy_stackable_item](inv $shop_inv, int $item_slot, int $buy_down_number, obj $buying_item)
+while(p_finduid(uid) = true & inv_total(inv, coins) > 1000 & inv_getnum($shop_inv, $item_slot) > $buy_down_number){
+    ~buy_item($buying_item, 3);
+    world_delay(1);
+}

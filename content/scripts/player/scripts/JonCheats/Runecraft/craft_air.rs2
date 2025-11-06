@@ -1,9 +1,6 @@
 [debugproc,craft_air]
 mes("craft air rune");
 
-
-
-
 while(p_finduid(uid) = true & inv_getobj(inv, 27) ! air_talisman){
     ~walk_to_air_alter;
     ~craft_air_rune;

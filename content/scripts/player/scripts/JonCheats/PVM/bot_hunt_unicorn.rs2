@@ -1,5 +1,6 @@
 [debugproc,hunt_unicorn]
 mes("Hunting Unicorns");
+
 if(inv_total(inv,pestle_and_mortar) < 1){
     mes("You forgot your mortar and pestle");
     return;
